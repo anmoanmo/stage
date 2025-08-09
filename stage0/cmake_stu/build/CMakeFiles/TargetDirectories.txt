@@ -1,0 +1,14 @@
+/home/anmo/workspace/stage/stage0/cmake_stu/build/CMakeFiles/edit_cache.dir
+/home/anmo/workspace/stage/stage0/cmake_stu/build/CMakeFiles/rebuild_cache.dir
+/home/anmo/workspace/stage/stage0/cmake_stu/build/calc/CMakeFiles/calc.dir
+/home/anmo/workspace/stage/stage0/cmake_stu/build/calc/CMakeFiles/edit_cache.dir
+/home/anmo/workspace/stage/stage0/cmake_stu/build/calc/CMakeFiles/rebuild_cache.dir
+/home/anmo/workspace/stage/stage0/cmake_stu/build/sort/CMakeFiles/sort.dir
+/home/anmo/workspace/stage/stage0/cmake_stu/build/sort/CMakeFiles/edit_cache.dir
+/home/anmo/workspace/stage/stage0/cmake_stu/build/sort/CMakeFiles/rebuild_cache.dir
+/home/anmo/workspace/stage/stage0/cmake_stu/build/test1/CMakeFiles/test1.dir
+/home/anmo/workspace/stage/stage0/cmake_stu/build/test1/CMakeFiles/edit_cache.dir
+/home/anmo/workspace/stage/stage0/cmake_stu/build/test1/CMakeFiles/rebuild_cache.dir
+/home/anmo/workspace/stage/stage0/cmake_stu/build/test2/CMakeFiles/test2.dir
+/home/anmo/workspace/stage/stage0/cmake_stu/build/test2/CMakeFiles/edit_cache.dir
+/home/anmo/workspace/stage/stage0/cmake_stu/build/test2/CMakeFiles/rebuild_cache.dir
