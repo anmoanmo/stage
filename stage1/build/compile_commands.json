@@ -1,0 +1,32 @@
+[
+{
+  "directory": "/home/anmo/workspace/stage/stage1/build",
+  "command": "/usr/bin/c++  -I/home/anmo/workspace/stage/stage1/include -O2 -g -DNDEBUG -Wall -Wextra -Wpedantic -Wconversion -Wshadow -fno-omit-frame-pointer -std=gnu++17 -o CMakeFiles/bitlog.dir/src/bitlog.cpp.o -c /home/anmo/workspace/stage/stage1/src/bitlog.cpp",
+  "file": "/home/anmo/workspace/stage/stage1/src/bitlog.cpp"
+},
+{
+  "directory": "/home/anmo/workspace/stage/stage1/build",
+  "command": "/usr/bin/c++  -I/home/anmo/workspace/stage/stage1/include -O2 -g -DNDEBUG -Wall -Wextra -Wpedantic -Wconversion -Wshadow -fno-omit-frame-pointer -std=gnu++17 -o CMakeFiles/bitlog.dir/src/formatter.cpp.o -c /home/anmo/workspace/stage/stage1/src/formatter.cpp",
+  "file": "/home/anmo/workspace/stage/stage1/src/formatter.cpp"
+},
+{
+  "directory": "/home/anmo/workspace/stage/stage1/build",
+  "command": "/usr/bin/c++  -I/home/anmo/workspace/stage/stage1/include -O2 -g -DNDEBUG -Wall -Wextra -Wpedantic -Wconversion -Wshadow -fno-omit-frame-pointer -std=gnu++17 -o CMakeFiles/bitlog.dir/src/sink.cpp.o -c /home/anmo/workspace/stage/stage1/src/sink.cpp",
+  "file": "/home/anmo/workspace/stage/stage1/src/sink.cpp"
+},
+{
+  "directory": "/home/anmo/workspace/stage/stage1/build",
+  "command": "/usr/bin/c++  -I/home/anmo/workspace/stage/stage1/include -O2 -g -DNDEBUG -Wall -Wextra -Wpedantic -Wconversion -Wshadow -fno-omit-frame-pointer -std=gnu++17 -o CMakeFiles/bitlog.dir/src/logger.cpp.o -c /home/anmo/workspace/stage/stage1/src/logger.cpp",
+  "file": "/home/anmo/workspace/stage/stage1/src/logger.cpp"
+},
+{
+  "directory": "/home/anmo/workspace/stage/stage1/build",
+  "command": "/usr/bin/c++  -I/home/anmo/workspace/stage/stage1/include -O2 -g -DNDEBUG -std=gnu++17 -o CMakeFiles/example_logger.dir/examples/logger.cpp.o -c /home/anmo/workspace/stage/stage1/examples/logger.cpp",
+  "file": "/home/anmo/workspace/stage/stage1/examples/logger.cpp"
+},
+{
+  "directory": "/home/anmo/workspace/stage/stage1/build",
+  "command": "/usr/bin/c++  -I/home/anmo/workspace/stage/stage1/include -O2 -g -DNDEBUG -std=gnu++17 -o CMakeFiles/formatter_tests.dir/tests/formatter_tests.cpp.o -c /home/anmo/workspace/stage/stage1/tests/formatter_tests.cpp",
+  "file": "/home/anmo/workspace/stage/stage1/tests/formatter_tests.cpp"
+}
+]

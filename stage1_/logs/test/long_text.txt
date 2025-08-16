@@ -1,0 +1,9040 @@
+# 搜索
+
+
+
+## 图的存储
+
+![image-20240815074919362](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240815074919362.png)
+
+### 邻接矩阵
+
+![image-20240811023816869](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240811023816869.png)
+
+
+
+```cpp
+#include<bits/stdc++.h>
+
+#define ll long long
+const int N = 100;
+using namespace std;
+int w[N][N];
+int vis[N];
+int n,m;
+
+void dfs(int u) {
+    vis[u] = true;
+    for (int i = 1; i <= n; i++) {
+        if (w[u][i]) {
+            cout << u << ' ' << i << ' ' << w[u][i] << '\n';
+            if (vis[i]) {
+                continue;
+            }
+            dfs(i);
+        }
+    }
+}
+
+void sol() {
+    cin>>n>>m;
+    for(int i=1;i<=m;i++){
+        int a,b,c;cin>>a>>b>>c;
+        w[a][b] = c;
+    }
+    dfs(1);
+    return;
+}
+```
+
+### 边集数组
+
+![image-20240811033809259](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240811033809259.png)
+
+```cpp
+#include<bits/stdc++.h>
+
+#define ll long long
+const int N = 100;
+using namespace std;
+int vis[N];
+int n,m;
+
+struct edge{
+    int u,v,w;
+}e[N];
+
+void dfs(int u) {
+    vis[u] = true;
+    for (int i = 1; i <= m; i++) { // 暴力枚举每个边，寻找u为该边的起始点，如果没找到，说明该点已经遍历完了
+        if (e[i].u==u) {
+            cout << e[i].u << ' ' << e[i].v << ' ' << e[i].w << '\n';
+            if (vis[i]) {
+                continue;
+            }
+            dfs(e[i].v);
+        }
+    }
+}
+
+void sol() {
+    cin>>n>>m;
+    for(int i=1;i<=m;i++){
+        cin>>e[i].u>>e[i].v>>e[i].w;
+    }
+    dfs(1);
+    return;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+
+//样例输入：
+//7 6
+//4 3 90
+//1 4 30
+//5 7 80
+//5 6 60
+//1 5 20
+//5 2 70
+//
+//样例输出：
+//1 4 30
+//4 3 90
+//1 5 20
+//5 7 80
+//5 6 60
+//5 2 70
+```
+
+### 邻接表
+
+![image-20240811035314615](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240811035314615-1723319605612-2.png)
+
+```cpp
+## 该写法只可用于树状图
+#include<bits/stdc++.h>
+
+#define ll long long
+const int N = 100;
+using namespace std;
+int vis[N];
+int n, m;
+
+struct edge {
+    int v, w;
+};
+vector<edge> e[N];//边集
+
+void dfs(int u, int fa) {
+    for (auto ed: e[u]) {
+        if (ed.v == fa) {
+            continue;
+        }
+        cout << u << ' ' << ed.v << ' ' << ed.w << '\n';
+        dfs(ed.v, u);
+    }
+}
+
+void sol() {
+    cin >> n >> m;
+    memset(e, 0, n + 1);
+    for (int i = 1; i <= m; i++) {
+        int a, b, c;
+        cin >> a >> b >> c;
+        e[a].push_back({b, c});
+        e[b].push_back({a, c});
+    }
+    dfs(1, 0);
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+//样例输入：
+//7 6
+//4 3 90
+//1 4 30
+//5 7 80
+//5 6 60
+//1 5 20
+//5 2 70
+//
+//样例输出：
+//1 4 30
+//4 3 90
+//1 5 20
+//5 7 80
+//5 6 60
+//5 2 70
+```
+
+### 链式邻接表
+
+![image-20240811042538705](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240811042538705.png)
+
+```cpp
+// 仍然无法处理成环
+#include<bits/stdc++.h>
+
+using namespace std;
+const int N = 510;
+int n, m, a, b, c;
+struct edge {
+    int u, v, w;
+};
+
+vector<edge> e;//边集
+vector<int> h[N];//点的所有出边
+// 加边函数
+void add(int a, int b, int c) {
+    e.push_back({a, b, c});
+    h[a].push_back(e.size() - 1);//记录对应点的编号
+}
+
+void dfs(int u, int fa) {
+    for (int i = 0; i < h[u].size(); i++) {//h[u].size()表示点后跟着几条边
+        
+        int j = h[u][i];
+        int v = e[j].v, w = e[j].w; 
+        if (v == fa) continue;
+        printf("%d,%d,%d\n", u, v, w);
+        dfs(v, u);
+    }
+}
+
+int main() {
+    cin >> n >> m;
+    for (int i = 1; i <= m; i++) {
+        cin >> a >> b >> c,
+                add(a, b, c);
+        add(b, a, c);
+    }
+    dfs(1, 0);
+    return 0;
+}
+
+
+//样例输出：
+//6 5
+//4 3 90
+//1 4 30
+//5 6 60
+//1 5 20
+//5 2 70
+//样例输出：
+//1,4,30
+//4,3,90
+//1,5,20
+//5,6,60
+//5,2,70
+```
+
+### 链式前向星
+
+![image-20240815071900795](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240815071900795.png)
+
+```cpp
+#include<bits/stdc++.h>
+
+#define ll long long
+using namespace std;
+const int N = 510, M = 3000;
+int n, m, a, b, c;
+struct edge {
+    int v, w, ne;
+};
+edge e[M];//边集
+int idx, h[N];//点的第一条出边 
+
+void add(int a, int b, int c) {
+    e[idx] = {b, c, h[a]};
+    h[a] = idx++;
+}
+
+void dfs(int u, int fa) {
+    for (int i = h[u]; ~i; i = e[i].ne) {
+        int v = e[i].v, w = e[i].w;
+        if (v == fa) continue;
+        printf("%d,%d,%d\n", u, v, w);
+        dfs(v, u);
+    }
+}
+
+int main() {
+    cin >> n >> m;
+    memset(h, -1, sizeof h);
+    for (int i = 1; i <= m; i++) {
+        cin >> a >> b >> c,
+                add(a, b, c);
+        add(b, a, c);
+    }
+    dfs(1, 0);
+    return 0;
+}
+```
+
+## STL容器
+
+![image-20240815075202528](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240815075202528.png)
+
+## 深搜（DFS）
+
+[B03 深搜(DFS) - 董晓 - 博客园 (cnblogs.com)](https://www.cnblogs.com/dx123/p/16320404.html)
+
+![image-20240815165551839](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240815165551839.png)
+
+![image-20240815165815171](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240815165815171.png)
+
+```cpp
+#include<bits/stdc++.h>
+
+using namespace std;
+const int N = 500;
+
+////////////////// DFS计算
+int n, m, a, b, c;
+vector<int> e[N];
+
+void dfs(int u, int fa) {
+    printf("进入%d\n",u);
+    for (auto v: e[u]) {
+        if (v == fa) continue;
+        printf("下走%d\n",u);
+        dfs(v, u);
+        printf("上回%d\n",u);
+    }
+    printf("离开%d\n",u);
+}
+
+int main() {
+    cin >> n >> m;
+    for (int i = 1; i <= m; i++)
+        cin >> a >> b,
+                e[a].push_back(b),
+                e[b].push_back(a);
+    dfs(1, 0);
+    return 0;
+}
+//样例输入：
+//8 7
+//1 5
+//1 4
+//5 2
+//5 6
+//5 7
+//6 3
+//6 8
+```
+
+![image-20240815173528302](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240815173528302.png)
+
+## DFS题目集
+
+### DFS 迷宫方案数
+
+[P1605 迷宫 - 洛谷 | 计算机科学教育新生态 (luogu.com.cn)](https://www.luogu.com.cn/problem/P1605)
+
+![image-20240815195758488](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240815195758488.png)
+
+![image-20240815200103568](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240815200103568.png)
+
+
+
+
+
+思路：简单的深搜遍历寻找
+
+```cpp
+#include<bits/stdc++.h>
+
+#define ll long long
+const int N = 12;
+using namespace std;
+int visited[N][N];
+int mg[N][N];
+int ans;
+int n, m;
+void dfs(int x, int y, int fx, int fy) {
+
+    if (x < 1 || x > n || y < 1 || y > m) return;
+    if (mg[x][y] == 1) return;
+    if (visited[x][y]) return;
+    if (x == fx && y == fy) {
+        ans++;
+        return;
+    }
+    visited[x][y] = 1;
+    dfs(x + 1, y, fx, fy);
+    dfs(x - 1, y, fx, fy);
+    dfs(x, y + 1, fx, fy);
+    dfs(x, y - 1, fx, fy);
+    visited[x][y] = 0;
+};
+
+void sol() {
+    int t;
+    cin >> n >> m >> t;
+    int sx, sy, fx, fy;
+    cin >> sx >> sy >> fx >> fy;
+    memset(visited, 0, sizeof(visited));
+    memset(mg, 0, sizeof(mg));
+    for (int i = 0; i < t; i++) {
+        int x, y;
+        cin >> x >> y;
+        mg[x][y] = 1;
+    }
+    ans = 0;
+    dfs(sx, sy, fx, fy);
+    cout << ans << endl;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+![image-20240815200233393](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240815200233393.png)
+
+### [P1644 跳马问题](https://www.luogu.com.cn/problem/P1644)
+
+
+
+思路：简单的dfs搜索答案（数据量不大）
+
+```cpp
+#include<bits/stdc++.h>
+
+#define ll long long
+const int N = 20;
+using namespace std;
+int vis[N][N];
+int n, m;
+int g[N][N];
+int ans;
+int dx[4] = {1,1,2,2};
+int dy[4] = {2,-2,1,-1};
+
+void dfs(int x, int y) {
+    if (x == m && y == n) {
+        ans++;
+        return;
+    }
+    for (int i = 0; i < 4; i++) {
+        int nx = x + dx[i];
+        int ny = y + dy[i];
+        if (nx < 0 || nx > m || ny < 0 || ny > n ) {
+            continue;
+        }
+        dfs(nx, ny);
+    }
+}
+
+void sol() {
+    cin >> n >> m;
+    ans = 0;
+    dfs(0, 0);
+    cout << ans << endl;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+![image-20240815203942546](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240815203942546.png)
+
+![image-20240815203954215](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240815203954215.png)
+
+### [P1219 八皇后](https://www.luogu.com.cn/problem/P1219)
+
+![image-20240815230919073](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240815230919073.png)
+
+![image-20240815231039887](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240815231039887.png)
+
+
+
+```cpp
+#include<bits/stdc++.h>
+
+#define ll long long
+const int N = 100;
+using namespace std;
+int n, ans;
+int pos[N], c[N], l[N], r[N];
+
+void dfs(int line) {
+    if (line > n) {
+        ans++;
+        if (ans <= 3) {
+            for (int i = 1; i <= n; i++) {
+                cout << pos[i] << ' ';
+            }
+            cout << endl;
+        }
+        return;
+    }
+    for (int j = 1; j <= n; j++) {
+        if (c[j] || r[line + j] || l[n + line - j]) {
+            continue;
+        }
+        pos[line] = j;
+        c[j] = r[line + j] = l[n + line - j] = 1;
+        dfs(line + 1);
+        c[j] = r[line + j] = l[n + line - j] = 0;
+    }
+}
+
+void sol() {
+    cin >> n;
+    ans = 0;
+    dfs(1);
+    cout << ans << endl;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+![image-20240815231243955](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240815231243955.png)
+
+
+
+### [P1596  水坑计数](https://www.luogu.com.cn/problem/P1596)
+
+**洪水填充（即连通性和统计连通块个数问题）**
+
+![image-20240816004601676](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816004601676.png)
+
+我的初次解题代码：
+
+```cpp
+#include<bits/stdc++.h>
+
+#define ll long long
+const int N = 110;
+using namespace std;
+int n, m;
+char g[N][N];
+int dx[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
+int dy[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
+int vis[N][N];
+int ans;
+bool ok;
+
+void dfs(int x, int y) {
+    if (vis[x][y] == 1) {
+        return;
+    }
+    if (g[x][y] == '.') {
+        return;
+    } else if (g[x][y] == 'W') {
+        vis[x][y] = 1;
+        if (ok) {
+            ok = false;
+            ans++;
+        }
+    }
+
+    for (int i = 0; i < 8; i++) {
+        int nx = x + dx[i];
+        int ny = y + dy[i];
+        if (nx < 1 || nx > n || ny < 1 || ny > m) {
+            continue;
+        }
+        dfs(nx, ny);
+    }
+}
+
+void sol() {
+    cin >> n >> m;
+    ans = 0;
+    memset(vis, 0, sizeof(vis));
+    char x;
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            cin >> x;
+            g[i][j] = x;
+        }
+    }
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            ok = true;
+            dfs(i, j);
+        }
+    }
+    cout << ans << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+董晓代码：
+
+优点：因为走过则不再访问的性质可以将已走过的地方认为是旱地，减少时间空间成本
+
+```cpp
+#include<iostream>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+
+const int N=1010;
+int n,m;
+char g[N][N];
+int dx[8]={-1,-1,-1,0,1,1,1,0};
+int dy[8]={-1,0,1,1,1,0,-1,-1};
+
+void dfs(int x,int y){
+  g[x][y]='.';
+  for(int i=0;i<8;i++){
+    int a=x+dx[i],b=y+dy[i];
+    if(a<0||a>=n||b<0||b>=m)continue;
+    if(g[a][b]=='.')continue;
+    dfs(a,b);
+  }
+}
+int main(){
+  cin >> n >> m;
+  for(int i=0;i<n;i++) 
+    scanf("%s",g[i]);
+  int ans=0;
+  for(int i=0;i<n;i++)
+    for(int j=0;j<m;j++)
+      if(g[i][j]=='W')
+        ans++, dfs(i,j);
+  cout << ans << endl;
+  return 0;
+}
+```
+
+![image-20240816004919369](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816004919369.png)
+
+
+
+### DFS 单词接龙
+
+
+
+**D**
+
+```CPP
+#include<iostream>
+using namespace std;
+
+const int N=25;
+int n,ans;
+int used[N]; //每个单词的使用次数
+string word[N];
+
+void dfs(string s){ //对当前串s接龙
+  int ls=s.size();
+  ans=max(ans,ls);
+  for(int i=0; i<n; i++){ //枚举每个单词
+    string w=word[i];
+    int lw=w.size();
+    for(int j=1; j<ls&&j<lw; j++){ //枚举位置
+      if(used[i]<2&&s.substr(ls-j)==w.substr(0,j)){
+        used[i]++; //使用次数+1
+        dfs(s+w.substr(j)); //dfs新串
+        used[i]--;
+        break;     //已是最长接法，结束j
+      }
+    }
+  }
+}
+int main(){
+  cin>>n;
+  for(int i=0; i<n; i++) cin>>word[i];
+  string start; cin>>start;
+  start="*"+start; //在前面添加一个字符，不用特判了
+  dfs(start);
+  cout<<ans-1<<endl;
+}
+```
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230617192800916-2101013833.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230617192801158-1704976477.png)
+
+
+
+## DFS剪枝 
+
+### 分成质数组
+
+[ybt1221分成质数组](http://ybt.ssoier.cn:8088/problem_show.php?pid=1221)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230618200646588-1310435928.png)
+
+
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230618200646843-3753875.png)
+
+**self**
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 20;
+using namespace std;
+vector<int> v(N), e[N];
+int cnt, ans = N, n;
+
+int gcd(int x, int y) {
+    return y ? gcd(y, x % y) : x;
+}
+
+bool check(int u, int i) {
+    for (auto j: e[i]) {
+        if (gcd(u, j) > 1) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void dfs(int u) {
+    if (cnt >= ans) {
+        return;
+    }
+    if (u == n) {
+        ans = cnt;
+        return;
+    }
+    for (int i = 0; i < cnt; i++) {
+        if (check(v[u], i)) {
+            e[i].push_back(v[u]);
+            dfs(u + 1);
+            e[i].pop_back();
+        }
+    }
+    e[cnt++].push_back(v[u]);
+    dfs(u + 1);
+    e[--cnt].pop_back();
+
+
+}
+
+void sol() {
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        cin >> v[i];
+    }
+    dfs(0);
+    cout << ans << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+**d**
+
+```cpp
+#include <cstdio>
+#include <iostream>
+#include <vector>
+using namespace std;
+
+const int N=11;
+int n,a[N],ans=N;
+vector<int> g[N];
+
+int gcd(int x,int y){
+  return y?gcd(y,x%y):x;
+}
+bool check(int x,int i){
+  for(int j=0; j<g[i].size(); j++)
+    if(gcd(x,g[i][j])>1) return false;
+  return true; 
+}
+void dfs(int u,int cnt){
+  if(cnt>=ans) return;       //剪枝
+  if(u==n){ans=cnt; return;} //边界
+  for(int i=1; i<=cnt; i++)  //枚举已有组
+    if(check(a[u],i)){ //如果a[u]能放第i组
+      g[i].push_back(a[u]); //放入第i组
+      dfs(u+1,cnt);
+      g[i].pop_back();      //恢复现场
+    }
+  g[cnt+1].push_back(a[u]); //新开一组
+  dfs(u+1,cnt+1);
+  g[cnt+1].pop_back();      //恢复现场
+}
+int main(){
+  scanf("%d",&n);
+  for(int i=0; i<n; i++)scanf("%d",a+i);
+  dfs(0,0);
+  printf("%d\n",ans);
+}
+```
+
+
+
+### 小猫爬山
+
+
+
+**self**
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 20;
+using namespace std;
+int n, w;
+vector<int> v(20);
+vector<int> f(20);
+int cnt, ans = N;
+
+
+void dfs(int u) {
+    if (cnt >= ans) {
+        return;
+    }
+    if (u == n) {
+        ans = cnt;
+        return;
+    }
+    for (int i = 0; i < cnt; i++) {
+        if (f[i] + v[u] <= w) {
+            f[i] += v[u];
+            dfs(u + 1);
+            f[i] -= v[u];
+        }
+    }
+    f[cnt++] += v[u];
+    dfs(u + 1);
+    f[--cnt] -= v[u];
+}
+
+void sol() {
+    cin >> n >> w;
+    for (int i = 0; i < n; i++) {
+        cin >> v[i];
+    }
+    dfs(0);
+    cout << ans << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230618200532623-615405630.png)
+
+
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230618204147234-2056318700.png)
+
+**D**
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int N=30;
+int n,w,ans=N,cnt;
+int c[N],sum[N];
+
+void dfs(int u){
+  if(cnt>=ans) return; //最优性剪枝
+  if(u==n){ans=cnt; return;} //边界
+  
+  for(int i=0;i<cnt;i++) //枚举已有车
+    if(sum[i]+c[u]<=w){
+      sum[i]+=c[u]; //装入第i辆车
+      dfs(u+1);
+      sum[i]-=c[u];
+    }
+    
+  sum[cnt++]=c[u]; //新开一辆车
+  dfs(u+1);
+  sum[--cnt]=0;
+}
+int main(){
+  cin>>n>>w;
+  for(int i=0;i<n;i++)cin>>c[i];
+  sort(c,c+n);
+  reverse(c,c+n); //优化搜索顺序
+  dfs(0);
+  cout<<ans;
+}
+```
+
+### 小木棍
+
+[P1120 小木棍 ](https://www.luogu.com.cn/problem/P1120)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230620200404204-772589902.png)
+
+
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230622234852498-1328103666.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230622234852752-1294212850.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230620200404411-1312200797.png)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131; // 用于字符串哈希
+const int N = 70;
+using namespace std;
+
+int n, sum, cnt, len;
+vector<int> v(N), e(N);
+bool flag = false;
+int vis[N];
+
+void dfs(int u, int cur, int start) {
+    if (u == cnt) {
+        cout << len << '\n';
+        exit(0);
+    }
+    if (cur == len) {
+        dfs(u + 1, 0, 0);
+        return;
+    }
+    for (int i = start; i < n; i++) {
+        if (vis[i] || cur + v[i] > len) {
+            continue;
+        }
+        vis[i] = 1;
+        dfs(u, cur + v[i], i + 1);
+        vis[i] = 0;
+        if (cur == 0) {
+            return;
+        }
+        if (cur + v[i] == len) {
+            return;
+        }
+        while (i < n-1 && v[i] == v[i + 1]) {
+            i++;
+        }
+    }
+}
+
+void sol() {
+    cin >> n;
+
+    for (int i = 0; i < n; i++) {
+        cin >> v[i];
+        sum += v[i];
+    }
+    sort(v.begin(), v.begin() + n, [&](int a, int b) {
+        return a > b;
+    });
+    for (len = v[0]; len <= sum; len++) {
+        if (sum % len != 0) {
+            continue;
+        }
+        cnt = sum / len;
+        dfs(0, 0, 0);
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int N=70;
+int n,len,cnt;
+int a[N],used[N];
+
+//当前拼接第u根原始木棍，已拼接的长度为cur，
+//下一段开始拼接的小木棍为start
+bool dfs(int u, int cur, int start){
+  if(u>cnt) return true;           //全部拼好，搜索成功
+  if(cur==len)return dfs(u+1,0,1); //拼好第u根，再拼下一根
+  for(int i=start; i<=n; i++){
+    if(used[i]||cur+a[i]>len)continue; //不合法就跳过
+    used[i]=1;
+    if(dfs(u,cur+a[i],i+1)) return true;
+    used[i]=0; //拼接a[i]失败，恢复现场，再尝试a[i+1]
+    
+    if(cur==0)return false;       //cut1:拼接第1个，失败回溯
+    if(cur+a[i]==len)return false;//cut2:拼接最后1个，失败回溯
+    while(i<n&&a[i]==a[i+1]) i++; //cut3:跳过与a[i]等长的元素
+  }
+  return false; //尝试完后面的所有的数，失败回溯
+}
+int main(){
+  scanf("%d",&n); int sum=0;
+  for(int i=1; i<=n; ++i)scanf("%d",&a[i]),sum+=a[i];
+  sort(a+1,a+1+n); reverse(a+1,a+1+n); //优化搜索顺序
+  for(len=a[1]; ;++len){
+    if(sum%len) continue; //不合法就跳过
+    cnt=sum/len;
+    if(dfs(1,0,1)) break; //第一次拼好即答案
+  }
+  printf("%d",len);
+}
+```
+
+```cpp
+#include<bits/stdc++.h>
+using namespace std;
+inline int read(){
+    int x=0; bool f=1; char c=getchar();
+    for(;!isdigit(c);c=getchar()) if(c=='-') f=0;
+    for(; isdigit(c);c=getchar()) x=(x<<3)+(x<<1)+c-'0';
+    if(f) return x;
+    return 0-x;
+}
+int n,m,a[66],next[66],cnt,sum,len;
+bool used[66],ok; //used数组即优化5的vis数组，记录每根木棍是否用过；ok记录是否已找到答案。 
+bool cmp(int a,int b){return a>b;}
+void dfs(int k,int last,int rest){ //k为正在拼的木棍的编号，last为正在拼的木棍的前一节编号，rest为该木棍还未拼的长度
+    int i;
+    if(!rest){ //未拼的长度为0，说明这根原始长棍拼完了，准备拼下一个 
+        if(k==m){ok=1; return;} //优化6，全部拼完并符合要求，找到答案，直接返回 
+        
+        for(i=1;i<=cnt;i++) //找一个还没用的最长的木棍打头即可。反正要想全都拼接成功，每根木棍都得用上 
+            if(!used[i]) break;
+        used[i]=1; 
+        dfs(k+1,i,len-a[i]);
+        used[i]=0;
+        if(ok) return; //优化6，找到答案就退出 
+    }
+    //优化4，二分找第一个 木棍长度不大于未拼长度rest 的位置 
+    int l=last+1, r=cnt, mid;
+    while(l<r){
+        mid=(l+r)>>1;
+        if(a[mid]<=rest) r=mid;
+        else l=mid+1;
+    }
+    for(i=l;i<=cnt;i++){
+        if(!used[i]){ //优化5，判断木棍是否用过 
+            used[i]=1;
+            dfs(k,i,rest-a[i]);
+            used[i]=0;
+            if(ok) return; //优化6，找到答案就退出 
+            
+            if(rest==a[i] || rest==len) return; //优化7 
+            i=next[i]; //优化3 
+            if(i==cnt) return;
+        }
+    }
+    //到了这里，说明这时候拼不成当前这根原始木棍了，传回失败信息并修改之前拼的木棍 
+}
+int main(){
+    n=read();
+    int d;
+    for(int i=1;i<=n;i++){
+        d=read();
+        if(d>50) continue;
+        a[++cnt]=d;
+        sum+=d;
+    }
+    sort(a+1,a+cnt+1,cmp); //优化1，木棍按长度从大到小排序 
+    //优化3，预处理next数组 
+    next[cnt]=cnt;
+    for(int i=cnt-1;i>0;i--){
+        if(a[i]==a[i+1]) next[i]=next[i+1];
+        else next[i]=i;
+    }
+    for(len=a[1];len<=sum/2;len++){ //枚举原始长度 
+        if(sum%len!=0) continue; //如果不能拼出整数根 就跳过 
+        m=sum/len; //优化6中的那个计算 
+        ok=0;
+        used[1]=1;
+        dfs(1,1,len-a[1]);
+        used[1]=0;
+        if(ok){printf("%d\n",len); return 0;} //优化6，输出答案，退 
+    }
+    printf("%d\n",sum); return 0;
+}
+```
+
+
+
+### 生日蛋糕
+
+[P1731 [NOI1999] 生日蛋糕 ](https://www.luogu.com.cn/problem/P1731)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230621213130082-1548349007.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230621213129999-1385669012.png)
+
+
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 20, inf = 1e9;
+using namespace std;
+int n, m, ans = inf;
+int minv[N], mins[N];
+
+void dfs(int u, int r, int h, int v, int s) {
+    if (u == 0) {
+        if (v == n) {
+            ans = min(ans, s);
+        }
+        return;
+    }
+    if (s + mins[u] >= ans) {
+        return;
+    }
+    if (v + minv[u] > n) {
+        return;
+    }
+
+    if (s + 2 * (n - v) / r >= ans) {
+        return;
+    }
+
+    for (int i = min(r - 1, (int) (sqrt(n - v))); i >= u; i--) {
+        for (int j = min(h - 1, (n - v) / (i * i)); j >= u; j--) {
+            dfs(u - 1, i, j, v + i * i * j, s + 2 * i * j + (u == m ? i * i : 0));
+        }
+    }
+
+}
+
+void sol() {
+    cin >> n >> m;
+    for (int i = 1; i <= m; i++) {
+        minv[i] = minv[i - 1] + i * i * i;
+        mins[i] = mins[i - 1] + 2 * i * i;
+    }
+    dfs(m, inf, inf, 0, 0);
+    if (ans == inf) {
+        ans = 0;
+    }
+    cout << ans << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 宽搜（BFS）
+
+![image-20240816005149924](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816005149924.png)
+
+![image-20240816013322335](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816013322335.png)
+
+![image-20240816014134688](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816014134688.png)
+
+
+
+
+
+```cpp
+#include<bits/stdc++.h>
+
+using namespace std;
+
+const int N = 100010;
+int n, m, a, b;
+vector<int> e[N];
+int vis[N];
+queue<int> q;
+
+void bfs(int s) {
+    vis[s] = 1;
+    q.push(s);
+    while(q.size()>0){
+        int x = q.front();
+        q.pop();
+        cout<<"出队："<<x<<'\n';
+        for(auto i:e[x]){
+            if(vis[i]){
+                continue;
+            }
+            vis[i] = 1;
+            q.push(i);
+            cout<<"  入队："<<i<<"\n";
+        }
+    }
+}
+
+int main() {
+    cin >> n >> m;
+    for (int i = 0; i < m; i++) {
+        cin >> a >> b;
+        e[a].push_back(b);
+        e[b].push_back(a);
+    }
+    bfs(1);// 广搜起点
+    return 0;
+}
+//
+//样例输入：
+//8 7
+//1 2
+//1 3
+//2 4
+//2 5
+//2 6
+//3 7
+//3 8
+```
+
+![image-20240816014325544](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816014325544.png)
+
+## BFS题目集
+
+### [3984 -- 迷宫问题 (poj.org)](http://poj.org/problem?id=3984)
+
+![image-20240816015006079](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816015006079.png)
+
+![image-20240816020630833](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816020630833.png)
+
+![image-20240816020954031](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816020954031.png)
+
+
+
+
+
+
+
+
+
+![image-20240816021036340](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816021036340.png)
+
+
+
+
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+const int N = 10;
+int n, m, a, b;
+int vis[N][N];
+
+struct node {
+    int x, y;
+} pre[N][N];
+
+int dx[4] = {0, 0, 1, -1};
+int dy[4] = {1, -1, 0, 0};
+
+
+void bfs(int x, int y) {
+    queue<node> q;
+    vis[x][y] = 1;
+    q.push({x, y});
+    while (q.size()) {
+        node ord = q.front();
+        q.pop();
+        for (int i = 0; i < 4; i++) {
+            int nx = ord.x + dx[i];
+            int ny = ord.y + dy[i];
+            if (nx < 0 || nx > 4 || ny < 0 || ny > 4 || vis[nx][ny]) {
+                continue;
+            }
+            vis[nx][ny] = 1;
+            pre[nx][ny] = ord;
+            q.push({nx, ny});
+        }
+    }
+}
+
+void ans(int x, int y) {
+    cout << '(' << x << ", " << y << ')' << '\n';
+    if (x == 4 && y == 4) {
+        return;
+    }
+    node p = pre[x][y];
+    ans(p.x, p.y);
+}
+
+int main() {
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; ++j) {
+            cin >> vis[i][j];
+        }
+    }
+    bfs(4, 4);// 广搜起点
+    ans(0, 0);
+    return 0;
+}
+```
+
+董晓：
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+using namespace std;
+
+const int N = 1010;
+int n,g[N][N];
+struct Node{
+  int x,y;
+} path[N][N];
+int dx[4]={-1,0,1,0};
+int dy[4]={0,1,0,-1};
+
+void bfs (int x,int y){
+  queue<Node> q;
+  q.push({x,y});
+  g[x][y] = 1;
+  while(q.size()){
+    auto u=q.front(); q.pop();
+    for(int i = 0; i < 4; i ++){
+      int a = u.x+dx[i],b = u.y+dy[i];
+      if(a<0||a>=n||b<0||b>=n)continue;
+      if(g[a][b])continue;
+      g[a][b] = 1;
+      path[a][b] = u;
+      q.push({a,b});
+    }        
+  }
+}
+int main(){
+  cin >> n;
+  for(int i = 0; i < n; i ++)
+    for(int j = 0; j < n; j ++)
+      scanf("%d",&g[i][j]);
+  bfs(n-1,n-1); //倒序搜索
+  Node p={0,0};
+  while(1){
+    printf("%d %d\n",p.x,p.y);
+    if(p.x==n-1&&p.y==n-1)break;
+    p = path[p.x][p.y];
+  }
+  return 0;
+}
+```
+
+
+
+### 多源BFS   矩阵距离
+
+![image-20240816031445888](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816031445888.png)
+
+个人解法：
+
+```cpp
+#include<bits/stdc++.h>
+
+#define ll long long
+const int N = 100;
+using namespace std;
+int g[N][N];
+int num;
+int vis[N][N];
+int dx[4] = {1, -1, 0, 0};
+int dy[4] = {0, 0, 1, -1};
+int n, m;
+
+void bfs(int x, int y) {
+    vis[x][y] = 1;//标记已访问
+    queue<pair<int, int>> q;
+    q.push({x, y});
+    while (!q.empty()) {
+        auto a = q.front();
+        q.pop();
+        //移动
+        for (int i = 0; i < 4; i++) {
+            int nx = a.first + dx[i];
+            int ny = a.second + dy[i];
+            //越界或重复访问时跳过
+            if (nx <= 0 || nx > n || ny <= 0 || ny > m || vis[nx][ny]) {
+                continue;
+            }
+            //找到答案
+            if (g[nx][ny] == 1) {
+                num = abs(nx - x) + abs(ny - y);
+                return;
+            }
+            //继续广搜
+            q.push({nx, ny});
+        }
+    }
+
+}
+
+void sol() {
+    cin >> n >> m;
+    //输入
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            cin >> g[i][j];
+        }
+    }
+    int ans[N][N];
+    //找答案
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            //跳过
+            if (g[i][j] == 1) {
+                ans[i][j] = 0;
+                continue;
+            }
+            //初始化访问数组
+            memset(vis, 0, sizeof(vis));
+            bfs(i, j);
+            ans[i][j] = num;
+        }
+    }
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            cout << ans[i][j] << ' ';
+        }
+        cout << "\n";
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+![image-20240816042222456](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816042222456.png)
+
+
+
+董晓：
+
+优点：相较于我的单源多次访问，多源访问有效地减少了时间和空间的消耗
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+using namespace std;
+
+const int N=1010;
+int n,m;
+char g[N][N];
+struct Node{int x,y;};
+int dis[N][N];
+int dx[4]={-1,0,1,0};
+int dy[4]={0,1,0,-1};
+
+void bfs(){
+  memset(dis,-1,sizeof dis);
+  queue<Node> q;
+  for(int i=0; i<n; i++)
+    for(int j=0; j<m; j++)
+      if(g[i][j] == '1')
+        dis[i][j]=0, q.push({i,j});
+  while(q.size()){
+    auto t=q.front(); q.pop();
+    for(int i=0; i < 4; i++){
+      int a=t.x+dx[i], b=t.y+dy[i];
+      if(a<0||a>=n||b<0||b>=m)continue;
+      if(dis[a][b]!=-1) continue;
+      dis[a][b]=dis[t.x][t.y]+1;
+      q.push({a,b});
+    }
+  }
+}
+int main(){
+  cin >> n >> m;
+  for(int i=0; i < n; i ++) 
+    scanf("%s",g[i]);
+  bfs();
+  for(int i=0; i < n; i ++){
+    for(int j=0; j < m; j ++) 
+      printf("%d ",dis[i][j]);
+    puts("");
+  }
+  return 0;
+}
+```
+
+![image-20240816042241950](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816042241950.png)
+
+
+
+### [P1379 八数码难题](https://www.luogu.com.cn/problem/P1379)
+
+
+
+我的代码
+
+```cpp
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+
+string g;
+const string goal = "123804765";
+int dx[4] = {-1, 1, -3, 3};
+
+bool is_valid_move(int idx, int nx) {
+    if (nx < 0 || nx > 8) return false;
+    // 防止越过左边界或右边界
+    if (idx % 3 == 2 && nx % 3 == 0) return false; // 右边界不能往左移
+    if (idx % 3 == 0 && nx % 3 == 2) return false; // 左边界不能往右移
+    return true;
+}
+
+int bfs(string str) {
+    unordered_map<string, int> d;
+    queue<string> q;
+    q.push(str);
+    d[str] = 0;
+    while (!q.empty()) {
+        auto s = q.front();
+        q.pop();
+        if (s == goal) {
+            return d[s];
+        }
+        int idx = s.find('0');
+        for (int i = 0; i < 4; i++) {
+            int nx = idx + dx[i];
+            if (!is_valid_move(idx, nx)) {
+                continue;
+            }
+            string s1 = s;
+            swap(s1[idx], s1[nx]);
+            if (d.find(s1) != d.end()) {
+                continue;
+            }
+            d[s1] = d[s] + 1;
+            q.push(s1);
+
+        }
+    }
+    return -1; // 如果没有找到解，返回 -1
+}
+
+void sol() {
+    // 初始化输入数据，建立起始图
+    cin >> g;
+    cout << bfs(g) << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+
+```
+
+![image-20240816084805847](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816084805847.png)
+
+董晓1：
+
+  
+
+```cpp
+#include <iostream>
+#include <algorithm>
+#include <queue>
+#include <unordered_map>
+using namespace std;
+
+char c; string str;
+unordered_map<string,int> d; 
+queue<string> q;
+int dx[4]={-1, 0, 1, 0};
+int dy[4]={0, 1, 0, -1};
+
+int bfs(string str){   
+  q.push(str);
+  string end="123804765"; //目标状态
+  while(q.size()){
+    auto s=q.front(); q.pop();
+    if(s==end) return d[s]; //到达目标
+    int k=s.find('0');
+    int x=k/3, y=k%3; //下标位置转换
+    for(int i=0; i < 4; i++){
+      int a=x+dx[i], b=y+dy[i];
+      if(a<0||a>=3||b<0||b>=3)continue;
+      int dis=d[s]; //记住步数
+      swap(s[k], s[a*3+b]); //交换
+      if(!d.count(s))d[s]=dis+1,q.push(s);
+      swap(s[k], s[a*3+b]); //还原
+    }
+  }
+}
+int main(){
+  for(int i=0; i<9; i++)cin>>c, str+=c;
+  cout << bfs(str);
+  return 0;
+}
+```
+
+
+
+董晓2：
+
+```cpp
+#include <iostream>
+#include <algorithm>
+#include <queue>
+#include <unordered_map>
+using namespace std;
+
+string goal="123804765"; //目标状态
+int dx[]={-1,0,1,0},dy[]={0,1,0,-1};
+
+int bfs(string str){
+  unordered_map<string,int> d;
+  queue<string> q;
+  q.push(str);
+  while(q.size()){
+    auto s=q.front(); q.pop();
+    if(s==goal) return d[s]; //边界
+    int k=s.find('0');
+    int x=k/3, y=k%3; //行列下标
+    for(int i=0; i < 4; i++){
+      int a=x+dx[i], b=y+dy[i];
+      if(a<0||a>=3||b<0||b>=3)continue;
+      string t=s;
+      swap(t[k],t[a*3+b]); //交换
+      if(!d.count(t)) d[t]=d[s]+1, q.push(t);
+    }
+  }
+}
+int main(){
+  char c; string str;
+  for(int i=0; i<9; i++)cin>>c,str+=c;
+  cout<<bfs(str);
+}
+```
+
+![image-20240816085902983](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816085902983.png)
+
+
+
+### [P1588 Catch That Cow S](https://www.luogu.com.cn/problem/P1588)
+
+我的题解：
+
+```cpp
+#include<bits/stdc++.h>
+
+#define ll long long
+const int N = 1e5 + 10;
+using namespace std;
+int g[N], vis[N];
+int ans, y;
+
+void bfs(int x) {
+    unordered_map<int, int> m;
+    m[x] = 0;
+    vis[x] = 1;
+    queue<int> q;
+    q.push(x);
+    while (q.size()) {
+        int n = q.front();
+        q.pop();
+        if (n == y) {
+            cout << m[n] << '\n';
+            return;
+        }
+        if (n + 1 < N) {
+            if (!m.count(n + 1)) {
+                m[n + 1] = m[n] + 1;
+                q.push(n + 1);
+            }
+        }
+        if (n - 1 > 0) {
+            if (!m.count(n - 1)) {
+                m[n - 1] = m[n] + 1;
+                q.push(n - 1);
+            }
+        }
+        if (2 * n < N) {
+            if (!m.count(2 * n)) {
+                m[2 * n] = m[n] + 1;
+                q.push(n * 2);
+            }
+        }
+    }
+
+}
+
+void sol() {
+    int x;
+    cin >> x >> y;
+    bfs(x);
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 0;
+    cin >> t;
+    while (t--) {
+        sol();
+    }
+}
+```
+
+![image-20240816171218207](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816171218207.png)
+
+![image-20240816171248492](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240816171248492.png)
+
+董晓：
+
+```cpp
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+#include <queue>
+using namespace std;
+
+const int N=100005;
+int x, y, dis[N];
+
+void bfs(){
+  memset(dis,-1,sizeof dis); dis[x]=0;
+  queue<int> q; q.push(x);
+  while(q.size()){
+    int x=q.front(); q.pop();
+    if(x+1<N && dis[x+1]==-1){
+      dis[x+1]=dis[x]+1; //前进一步
+      q.push(x+1);
+    }
+    if(x-1>0 && dis[x-1]==-1){
+      dis[x-1]=dis[x]+1; //后退一步
+      q.push(x-1);
+    }
+    if(2*x<N && dis[2*x]==-1){
+      dis[2*x]=dis[x]+1; //走到2x位置
+      q.push(2*x);
+    }
+    if(x==y){printf("%d\n",dis[y]);return;}
+  }
+}
+int main(){
+  int T; cin>>T;
+  while(T--) cin>>x>>y, bfs();
+}
+```
+
+### [P2730  魔板 Magic Squares](https://www.luogu.com.cn/problem/P2730)
+
+我的代码：
+
+```cpp
+#include<bits/stdc++.h>
+
+#define ll long long
+const int N = 10;
+using namespace std;
+string be = "12348765";
+string goal;
+string s1;
+
+void bfs() {
+    unordered_map<string, string> ans;
+    queue<string> q;
+    ans[be] = "";
+    q.push(be);
+    while (!q.empty()) {
+        string p = q.front();
+        q.pop();
+        //找到并且输出答案
+        if (p == goal) {
+            cout << ans[p].size() << '\n';
+            int f = 0;
+            for (auto i: ans[p]) {
+                cout << i;
+                f++;
+                if (f % 60 == 0) {
+                    cout << '\n';
+                }
+            }
+            return;
+        }
+
+        s1 = std::string(1, p[4]) + std::string(1, p[5]) + std::string(1, p[6]) +
+             std::string(1, p[7]) + std::string(1, p[0]) + std::string(1, p[1]) +
+             std::string(1, p[2]) + std::string(1, p[3]);
+        if (ans.find(s1) == ans.end()) {
+            q.push(s1);
+            ans[s1] = ans[p] + 'A';
+        }
+
+        s1 = std::string(1, p[3]) + std::string(1, p[0]) + std::string(1, p[1]) +
+             std::string(1, p[2]) + std::string(1, p[7]) + std::string(1, p[4]) +
+             std::string(1, p[5]) + std::string(1, p[6]);
+        if (ans.find(s1) == ans.end()) {
+            q.push(s1);
+            ans[s1] = ans[p] + 'B';
+        }
+        s1 = std::string(1, p[0]) + std::string(1, p[5]) + std::string(1, p[1]) +
+             std::string(1, p[3]) + std::string(1, p[4]) + std::string(1, p[6]) +
+             std::string(1, p[2]) + std::string(1, p[7]);
+        if (ans.find(s1) == ans.end()) {
+            q.push(s1);
+            ans[s1] = ans[p] + 'C';
+        }
+    }
+}
+
+void sol() {
+    goal.clear();
+    for (int i = 0; i < 8; i++) {
+        char x;
+        cin >> x;
+        goal += x;
+    }
+    goal = std::string(1, goal[0]) + std::string(1, goal[1]) + std::string(1, goal[2]) +
+           std::string(1, goal[3]) + std::string(1, goal[7]) + std::string(1, goal[6]) +
+           std::string(1, goal[5]) + std::string(1, goal[4]);
+    bfs();
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+![img](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/1973969-20230612192451371-1538804048.png)
+
+![img](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/1973969-20230612192451580-1538300516.png)
+
+![img](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/1973969-20230612192451619-1358311339.png)
+
+
+
+董晓：
+
+思路一样，但是写得比我好看（）
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+#include <map>
+using namespace std;
+
+string ed; //目标串
+queue<string> q; //队列<状态串>
+map<string,string> mp; //哈希<状态串,操作串>
+
+void moveA(string x){
+  string y=x;
+  for(int i=0;i<4;i++) swap(x[i],x[7-i]);
+  if(mp.count(x)==0)q.push(x), mp[x]=mp[y]+'A';
+}
+void moveB(string x){
+  string y=x;
+  x[0]=y[3],x[1]=y[0],x[2]=y[1],x[3]=y[2],
+  x[4]=y[5],x[5]=y[6],x[6]=y[7],x[7]=y[4];
+  if(mp.count(x)==0)q.push(x), mp[x]=mp[y]+'B';
+}
+void moveC(string x){
+  string y=x;
+  x[1]=y[6],x[2]=y[1],x[5]=y[2],x[6]=y[5];
+  if(mp.count(x)==0)q.push(x), mp[x]=mp[y]+'C';
+}
+void bfs(){
+  q.push("12345678"); mp["12345678"]="";
+  while(q.size()){
+    string s=q.front(); q.pop();
+    moveA(s); moveB(s); moveC(s);
+    if(mp.count(ed)){
+      cout<<mp[ed].size()<<endl<<mp[ed];
+      return;
+    }
+  }
+}
+int main(){
+  char c;
+  for(int i=0;i<8;i++)cin>>c, ed+=c;
+  bfs();
+}
+```
+
+
+
+### 双端队列BFS	[P4667 Switch the Lamp On 电路维修 ](https://www.luogu.com.cn/problem/P4667)
+
+![img](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/1973969-20230614183001697-1324292516.png)
+
+```cpp
+#include<bits/stdc++.h>
+
+#define ll long long
+const int N = 510;
+using namespace std;
+int MAX = 1e8;
+int n, m;
+char g[N][N];
+int vis[N][N];
+int dis[N][N];
+char op[4] = {'\\', '/', '\\', '/'};
+int dx[4] = {-1, -1, 1, 1}, dy[4] = {-1, 1, 1, -1};
+int where_x[4] = {-1, -1, 0, 0}, where_y[4] = {-1, 0, 0, -1};
+
+void bfs() {
+    deque<pair<int, int>> dq;
+    dq.push_front({0, 0});
+    memset(dis, 0x3f, sizeof dis);
+    // 这行代码的问题在于 memset 并不适合用来初始化整型数组为一个大于 char 范围的整数值。
+    // 在你的代码中，MAX 是 1e8，相当于 100,000,000，这是一个很大的数，但 memset 的作用是按字节填充内存，
+    // 所以你会发现 dis 数组的值并不会被正确初始化为 MAX。
+   // memset 只能将数组中的每个字节设置为相同的值，通常用于初始化为 0 或 -1（即所有字节都为 0 或 0xFF）。
+   // 对于整型数组，直接使用 memset 初始化为一个大于 255 的值会导致意想不到的结果。
+    dis[0][0] = 0;
+    while (dq.size()) {
+        auto p = dq.front();
+        int x = p.first, y = p.second;
+        dq.pop_front();
+        if (vis[x][y]) {
+            continue;
+        }
+        if (x == n && y == m) {
+            break;
+        }
+        vis[x][y] = 1;
+        for (int i = 0; i < 4; i++) {
+            int nx = x + dx[i], ny = y + dy[i];
+            if (nx < 0 || nx > n || ny < 0 || ny > m) {
+                continue;
+            }
+            int where_now_x = x + where_x[i], where_now_y = y + where_y[i];
+            bool ok = g[where_now_x][where_now_y] == op[i];
+            int d = dis[x][y] + (ok ? 0 : 1);
+            if (d < dis[nx][ny]) {
+                dis[nx][ny] = d;
+                if (ok) {
+                    dq.push_front({nx, ny});
+                } else {
+                    dq.push_back({nx, ny});
+                }
+            }
+
+        }
+    }
+    if (dis[n][m] == 0x3f3f3f3f) {
+        cout << "NO SOLUTION\n";
+    } else {
+        cout << dis[n][m] << '\n';
+    }
+
+}
+
+void sol() {
+    cin >> n >> m;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            cin >> g[i][j];
+        }
+    }
+    bfs();
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230614182801142-1348031064.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230614182800981-252926053.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230614182801217-979292651.png)
+
+
+
+**d**
+
+```cpp
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+#include <deque>
+using namespace std;
+
+typedef pair<int,int> PII;
+const int N=510;
+int n,m;
+char g[N][N];   //存储格内斜边
+int dis[N][N];  //存储操作步数
+bool vis[N][N]; //判重
+char es[]="\\/\\/"; //格内斜边，左上角开始顺时针记录 
+int dx[]={-1,-1,1,1},dy[]={-1,1,1,-1}; //格点增量
+int ex[]={-1,-1,0,0},ey[]={-1,0,0,-1}; //格子增量
+
+int bfs(){
+  memset(dis,0x3f,sizeof dis); dis[0][0]=0;
+  deque<PII> q; q.push_back({0,0});
+  while(q.size()){
+    PII u=q.front(); q.pop_front(); //队头出队
+    int x=u.first,y=u.second; //父格点
+    if(vis[x][y]) continue;   //已出过队，已最小
+    vis[x][y]=true;           //出队标记，只扩展一次   
+    for(int i=0; i<4; i++){
+      int a=x+dx[i],b=y+dy[i];   //子格点
+      if(a<0||a>n||b<0||b>m) continue;
+      int ea=x+ex[i],eb=y+ey[i]; //格子
+      int d=dis[x][y]+(g[ea][eb]!=es[i]);
+      if(d<dis[a][b]){  //从(x,y)到(a,b)操作更少
+        dis[a][b]=d;
+        if(g[ea][eb]!=es[i])q.push_back({a,b});//队尾入队
+        else q.push_front({a,b}); //队头入队
+      }
+    }
+  }
+  return dis[n][m];
+}
+int main(){
+  scanf("%d%d",&n,&m);
+  for(int i=0; i<n; i++) scanf("%s",g[i]);
+  int d=bfs();
+  if(d==0x3f3f3f3f) puts("NO SOLUTION");
+  else printf("%d\n",d);
+}
+```
+
+
+
+### 双向BFS HDU3085
+
+[Problem - 3085 (hdu.edu.cn)](https://acm.hdu.edu.cn/showproblem.php?pid=3085)
+
+```cpp
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#include<queue>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 810;
+using namespace std;
+char g[N][N];
+int n, m;
+int dx[4] = {-1, 0, 1, 0};
+int dy[4] = {0, 1, 0, -1};
+int vis[N][N];
+queue<pair<int, int>> qm, qg;
+vector<pair<int, int>> vx;
+int times;
+
+bool check(int x, int y) {
+    if (x < 1 || x > n || y < 1 || y > m || g[x][y] == 'X') {
+        return false;
+    }
+    if (abs(vx[0].first - x) + abs(vx[0].second - y) <= 2 * times) {
+        return false;
+    }
+    if (abs(vx[1].first - x) + abs(vx[1].second - y) <= 2 * times) {
+        return false;
+    }
+    return true;
+}
+
+void bfs() {
+    times = 0;
+    memset(vis, 0, sizeof vis);
+    while (!qm.empty() || !qg.empty()) {
+        times++;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0, s = qm.size(); j < s; j++) {
+                auto t = qm.front();
+                qm.pop();
+                int x = t.first, y = t.second;
+                if (!check(x, y)) {
+                    continue;
+                }
+
+                for (int k = 0; k < 4; k++) {
+                    int a = x + dx[k], b = y + dy[k];
+                    if (check(a, b)) {
+                        if (vis[a][b] == 2) {
+                            cout << times << '\n';
+                            return;
+                        }
+                        if (!vis[a][b]) {
+                            vis[a][b] = 1;
+                            qm.push({a, b});
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < 1; i++) {
+            for (int j = 0, s = qg.size(); j < s; j++) {
+                auto t = qg.front();
+                qg.pop();
+                int x = t.first, y = t.second;
+                if (!check(x, y)) {
+                    continue;
+                }
+
+                for (int k = 0; k < 4; k++) {
+                    int a = x + dx[k], b = y + dy[k];
+                    if (check(a, b)) {
+                        if (vis[a][b] == 1) {
+                            cout << times << '\n';
+                            return;
+                        }
+                        if (!vis[a][b]) {
+                            vis[a][b] = 2;
+                            qg.push({a, b});
+                        }
+                    }
+                }
+            }
+        }
+    }
+    cout << -1 << '\n';
+
+}
+
+void sol() {
+    //初始化输入数据
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            cin >> g[i][j];
+            if (g[i][j] == 'M') {
+                vis[i][j] = 1;
+                qm.push({i, j});
+            } else if (g[i][j] == 'G') {
+                vis[i][j] = 2;
+                qg.push({i, j});
+            } else if (g[i][j] == 'Z') {
+                vx.push_back({i, j});
+            }
+        }
+    }
+    bfs();
+    while (!qm.empty()) {
+        qm.pop();
+    }
+    while (!qg.empty()) {
+        qg.pop();
+    }
+    vx.clear();
+
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 0;
+    cin >> t;
+    while (t--) {
+        sol();
+    }
+}
+```
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230615212533811-1611083717.png)
+
+
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230615212533861-520830808.png)
+
+
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230615212534051-1824963371.png)
+
+```cpp
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#include<queue>
+
+#define x first
+#define y second
+using namespace std;
+
+const int N = 810;
+int n, m;
+char g[N][N];  //地图
+int vis[N][N]; //2表示女孩走过,1表示男孩走过,0都没走过
+pair<int, int> boy, girl, ghost[2]; //存储人、鬼的初始位置
+int dx[4] = {-1, 0, 1, 0}, dy[4] = {0, 1, 0, -1}; //搜索的方向数组
+
+bool check(int x, int y, int tim) {
+    if (x < 0 || x >= n || y < 0 || y >= m || g[x][y] == 'X') return false;
+    for (int i = 0; i < 2; i++)
+        if (abs(x - ghost[i].x) + abs(y - ghost[i].y) <= tim * 2)return false;
+    return true; //(x,y)合法则返回true
+}
+
+int bfs() {
+    int tim = 0;
+    memset(vis, 0, sizeof vis);
+    queue<pair<int, int>> qb, qg;
+    qb.push(boy);
+    qg.push(girl);
+    while (qb.size() || qg.size()) {
+        tim++; //增加1秒
+        for (int i = 0; i < 3; i++) //男孩走3步
+            for (int j = 0, s = qb.size(); j < s; j++) { //枚举队中所有点
+                pair<int, int> t = qb.front();
+                qb.pop();
+                int x = t.x, y = t.y;
+                if (!check(x, y, tim)) continue;  //(x,y)非法则跳过
+                for (int k = 0; k < 4; k++) {          //4个方向
+                    int a = x + dx[k], b = y + dy[k];
+                    if (check(a, b, tim)) {            //(a,b)合法
+                        if (vis[a][b] == 2) return tim; //2表示女孩走过
+                        if (!vis[a][b]) vis[a][b] = 1, qb.push({a, b});
+                    }
+                }
+            }
+        for (int i = 0; i < 1; i++) //女孩走1步
+            for (int j = 0, s = qg.size(); j < s; j++) {
+                pair<int, int> t = qg.front();
+                qg.pop();
+                int x = t.x, y = t.y;
+                if (!check(x, y, tim)) continue;
+                for (int k = 0; k < 4; k++) {
+                    int a = x + dx[k], b = y + dy[k];
+                    if (check(a, b, tim)) {
+                        if (vis[a][b] == 1) return tim; //1表示男孩走过
+                        if (!vis[a][b]) vis[a][b] = 2, qg.push({a, b});
+                    }
+                }
+            }
+    }
+    return -1; //无解返回-1
+}
+
+int main() {
+    int T;
+    scanf("%d", &T);
+    while (T--) {
+        scanf("%d%d", &n, &m);
+        for (int i = 0; i < n; i++) scanf("%s", g[i]);
+        for (int i = 0, t = 0; i < n; i++) //找出人、鬼的位置
+            for (int j = 0; j < m; j++)
+                if (g[i][j] == 'M') boy = {i, j};
+                else if (g[i][j] == 'G') girl = {i, j};
+                else if (g[i][j] == 'Z') ghost[t++] = {i, j};
+        printf("%d\n", bfs());
+    }
+}
+```
+
+
+
+### 双端BFS 字串变换
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230616205759138-1877456648.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230616205759436-1430534546.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230616205759338-1741878654.png)
+
+
+
+**d**
+
+```cpp
+#include <iostream>
+#include <queue>
+#include <unordered_map>
+using namespace std;
+
+const int N=7;
+int n;
+string A,B,a[N],b[N];
+
+int extend(queue<string>&q, unordered_map<string,int>&da,
+           unordered_map<string,int>&db, string a[], string b[]){
+    int m=q.size();
+    while(m--){                       //每次扩展一层
+        auto f=q.front(); q.pop();      //父串出队
+        for(int i=0; i<n; i++)          //枚举规则
+            for(int j=0; j<f.size(); j++) //枚举父串中的位置
+                if(f.substr(j,a[i].size())==a[i]){
+                    string s=f.substr(0,j)+b[i]+f.substr(j+a[i].size());
+                    if(da.count(s)) continue;
+                    if(db.count(s)) return da[f]+db[s]+1;
+                    da[s]=da[f]+1;  //变换步数
+                    q.push(s);      //子串入队
+                }
+    }
+    return 11;
+}
+int bfs(){
+    if(A==B) return 0;
+    queue<string> qa,qb;
+    unordered_map<string,int> da,db;
+    qa.push(A),qb.push(B); da[A]=db[B]=0;
+
+    int step=10, t;
+    while(step--){
+        if(qa.size()<=qb.size()) t=extend(qa,da,db,a,b);
+        else t=extend(qb,db,da,b,a);
+        if(t<=10) return t;
+    }
+    return 11;
+}
+int main(){
+    cin>>A>>B;
+    while(cin>>a[n]>>b[n]) n++;
+    int t=bfs();
+    t==11?printf("NO ANSWER!"):printf("%d",t);
+}
+```
+
+
+
+
+
+## 迭代加深
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230622215358129-1563990419.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230622215358421-893306500.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230622215358252-1854873521.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202306/1973969-20230622215358244-1518445742.png)
+
+
+
+板子
+
+```cpp
+#include <iostream>
+using namespace std;
+
+int n, d;     //d为搜索深度
+int a[10005]; //存储加成序列
+
+bool dfs(int u){ //搜索第u层
+  if(u==d) return a[u-1]==n;
+  for(int i=u-1;i>=0;i--){//cut1:优化搜索顺序
+    int t=a[u-1]+a[i];
+    if(t>n) continue;     //cut2:越界剪枝
+    a[u]=t;
+    for(int j=u+1; j<=d; j++) t*=2;
+    if(t<n) return false; //cut3:估价未来
+    if(dfs(u+1)) return true;
+  }
+  return false;
+}
+int main(){
+  a[0]=1;
+  while(scanf("%d",&n),n){
+    d=1;
+    while(!dfs(1)) d++; //失败则增加一层
+    for(int i=0; i<d; i++) printf("%d ",a[i]);
+    puts("");
+  }
+}
+```
+
+[UVA529 Addition Chains - 洛谷](https://www.luogu.com.cn/problem/UVA529)
+
+```cpp
+#include<iostream>
+typedef unsigned long long ULL;
+typedef long long LL;
+const int N = 1e4+5;
+using namespace std;
+
+int n, d;
+int a[N];
+
+bool dfs(int u)
+{
+	if (u == d)
+	{
+		return a[u - 1] == n;
+	}
+	for (int i = u - 1; i >= 0; i--)
+	{
+		int t = a[i] + a[u - 1];
+		if (t > n)
+		{
+			continue;
+		}
+		a[u] = t;
+		for (int j = u + 1; j <= d; j++)
+		{
+			t *= 2;
+		}
+		if (t < n)
+		{
+			return false;
+		}
+		if (dfs(u + 1))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void sol()
+{
+	a[0] = 1;
+	while (scanf("%d", &n), n)
+	{
+		d = 1;
+		while (!dfs(1)) d++;
+		for (int i = 0; i < d; i++)
+		{
+			cout << a[i] << " \n"[i == d - 1];
+		}
+	}
+}
+
+int main()
+{
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+
+	sol();
+}
+
+```
+
+## 双向DFS
+
+![img](./董晓算法.assets/1973969-20230623203521493-1664729287.png)
+
+![img](./董晓算法.assets/1973969-20230623203521787-23044222.png)
+
+![img](./董晓算法.assets/1973969-20230623203521750-1989856323.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 字符串
+
+## 最小表示法
+
+[P1368 【模板】最小表示法 ](https://www.luogu.com.cn/problem/P1368)
+
+![image-20240817225630075](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240817225630075.png)
+
+![image-20240818062231629](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240818062231629.png)
+
+![image-20240818062240939](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240818062240939.png)
+
+```cpp
+#include<bits/stdc++.h>
+
+#define ll long long
+const int N = 1e5;
+using namespace std;
+
+void sol() {
+    int n;
+    cin >> n;
+    vector<int> v(2 * n);
+    //初始化
+    for (int i = 0; i < n; i++) {
+        cin >> v[i];
+        v[i + n] = v[i];
+    }
+    int i = 0, j = 1, k = 0;
+    while (i < n && j < n) {
+        for (k = 0; k < n && v[i + k] == v[j + k]; k++);
+        v[i + k] > v[j + k] ? i = i + k + 1 : j = j + k + 1;
+        if (i == j) {
+            j++;
+        }
+    }
+    for (int f = min(i, j); f < min(i, j) + n; f++) {
+        cout << v[f] << ' ';
+    }
+    cout << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+**这里对于三指针的进一步解读（个人）：**
+
+三指针分别为**i=0, j=1, k=0**为起始。认为min(i, j)为最小的起始头，因为我们在对指针进行移动的过程中，大指针（右边的指针）会扫过相同或者 更小的元素，并期望用更小的元素作为起始头（如果相同则用后续元素更小的作为起始头）。并用k进行跳步操作，在这种相同的k的情况下可以避免我们在跳步操作时跳过了更小的起始头（因为i,k的不等），而当新的起始头确立时，i，j前面的元素可以视为劣质队，而min(i,j)前的劣质队要由于另一个指针前的劣质队（原因是后者就是因为劣质队更劣的原因而跳到后面的）。最后指针可以滑到原来字符串的最后一位，并判断此时是不是会存在最优。所以最后截取成双链的答案部分substr(min(i,j),min(i,j)+n)。
+
+
+
+
+
+## 字符串哈希
+
+![image-20240818071938588](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240818071938588.png)
+
+![image-20240818072608277](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240818072608277.png)
+
+  ![image-20240818081021929](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240818081021929.png)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ULL;
+typedef long long LL;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+vector<ULL> p[N];
+
+ULL into(string s) {
+    ULL ans = 0;
+    for (int i = 0; i < s.size(); i++) {
+        ans = ans * P + s[i];
+    }
+    return ans;
+}
+
+void sol() {
+    int n;
+    cin >> n;
+    vector<ULL> ans;
+    for (int i = 0; i < n; i++) {
+        string s;
+        cin >> s;
+        ans.push_back(into(s));
+    }
+    sort(ans.begin(), ans.begin() + n);
+    int f = 1;
+    for (int i = 1; i < n; i++) {
+        if (ans[i] != ans[i - 1]) {
+            f++;
+        }
+    }
+    cout << f << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+**板子**
+
+```cpp
+// 预处理 hash函数的前缀和
+void init() {
+    p[0] = 1, h[0] = 0;
+    for (int i = 1; i <= n; i++) {
+        p[i] = p[i - 1] * P;
+        h[i] = h[i - 1] * P + s[i];
+    }
+}
+
+// 计算s[l~r]的 hash值
+ULL get(int l, int r) {
+    return h[r] - h[l - 1] * p[r - l + 1];
+}
+//判断字符串是否相同
+bool is_same(int l1,int r1, int l2, int r2){
+    return get(l1,r1) == get(l2,r2);
+}
+```
+
+
+
+
+
+## KMP算法
+
+![image-20240818093154521](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240818093154521.png)
+
+![image-20240820051040496](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240820051040496.png)
+
+![image-20240820051338104](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240820051338104.png)
+
+![image-20240820051351677](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240820051351677.png)
+
+![image-20240820051358859](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240820051358859.png)
+
+我的代码：
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ULL;
+typedef long long LL;
+const int P = 131;//用于字符串哈希
+const int N = 1e6 + 10;
+using namespace std;
+int ne[N];
+string s1, s2;
+
+
+void kmp_next() {
+    ne[1] = 0;
+    int n = s2.size() - 1;
+    for (int i = 2, j = 0; i <= n; i++) {
+        while (j && s2[i] != s2[j + 1]) {
+            j = ne[j];
+        }
+        if (s2[i] == s2[j + 1]) {
+            j++;
+        }
+        ne[i] = j;
+    }
+}
+
+void kmp() {
+    int n1 = s1.size() - 1;
+    int n2 = s2.size() - 1;
+    for (int i = 1, j = 0; i <= n1; i++) {
+        while (j && s1[i] != s2[j + 1]) {
+            j = ne[j];
+        }
+        if (s1[i] == s2[j + 1]) {
+            j++;
+        }
+        if (j == n2) {
+            cout << i - n2 + 1 << '\n';
+        }
+    }
+}
+
+void sol() {
+    cin >> s1 >> s2;
+    s1 = ' ' + s1;
+    s2 = ' ' + s2;
+    kmp_next();
+    kmp();
+    for (int i = 1; i < s2.size(); i++) {
+        cout << ne[i] << ' ';
+    }
+
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+董晓：
+
+```cpp
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 1000010;
+int m, n;
+char S[N], P[N];
+int nxt[N];
+
+int main() {
+    cin >> (S + 1) >> (P + 1);  // 从 S[1] 和 P[1] 开始存储输入
+    m = strlen(S + 1);    // 从 S[1] 开始计算长度
+    int n = strlen(P + 1);    // 从 P[1] 开始计算长度
+
+    nxt[1] = 0;
+    for (int i = 2, j = 0; i <= n; i++) {
+        while (j && P[i] != P[j + 1]) j = nxt[j];
+        if (P[i] == P[j + 1]) j++;
+        nxt[i] = j;
+    }
+
+    for (int i = 1, j = 0; i <= m; i++) {
+        while (j && S[i] != P[j + 1]) j = nxt[j];
+        if (S[i] == P[j + 1]) j++;
+        if (j == n) printf("%d\n", i - n + 1);
+    }
+
+    for (int i = 1; i <= n; i++)printf("%d ", nxt[i]);
+    return 0;
+}
+```
+
+进一步解读（个人）：
+
+对于：
+
+```cpp
+for (int i = 2, j = 0; i <= n; i++) {
+        while (j && P[i] != P[j + 1]) j = nxt[j];
+        if (P[i] == P[j + 1]) j++;
+        nxt[i] = j;
+    }
+```
+
+中j的解读，可以看作可匹配字符串的最后长度，而nxt[j]可以看作这个可匹配字符串中可因为前后缀相等的关系保留多少位。如ababacb中，在创建nxt数组的过程中eg：当i=6，也就是p[i] = c时，此时j=3，意味着他的前缀可匹配的字符串，而j+1作为预测下一个字符串是否等于c使前后缀继续进行，如果!=，则询问j表示的可匹配字符串能保留下来多少位，即j = nxt[j]。将保留下的数字进一步进行判断是否可与p[i]进行衔接，while循环持续至可衔接或者退至初始状态（即无可匹配前缀字符串）。
+
+而对于：
+
+```cpp
+for (int i = 1, j = 0; i <= m; i++) {
+        while (j && S[i] != P[j + 1]) j = nxt[j];
+        if (S[i] == P[j + 1]) j++;
+        if (j == n) printf("%d\n", i - n + 1);
+    }
+```
+
+则同理，当j==n时可知道已经出现一对可匹配字符串（此时可对其进行操作如：记录位置，记录次数等），而如果没有跳出则继续遍历主串，又此时一定满足 S[i] != P[j + 1]，那么j将进行如上的回退操作，直至出现符合长度。
+
+
+
+## 扩展KMP
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 动态规划
+
+
+
+## 记忆化搜索
+
+[P1216 [USACO1.5\] [IOI1994]数字三角形 Number Triangles - 洛谷 | 计算机科学教育新生态 (luogu.com.cn)](https://www.luogu.com.cn/problem/P1216)
+
+我的代码（初见）：
+
+```cpp
+// 自底向上
+
+#include<bits/stdc++.h>
+
+typedef unsigned long long ULL;
+typedef long long LL;
+const int P = 131;//用于字符串哈希
+const int N = 1e3 + 10;
+using namespace std;
+int g[N][N];
+int ans[N][N];
+
+
+void sol() {
+    int r;
+    cin >> r;
+    for (int i = 1; i <= r; i++) {
+        for (int j = 1; j <= i; j++) {
+            cin >> g[i][j];
+        }
+    }
+    for (int i = r; i >= 1; i--) {
+        for (int j = 1; j <= i; j++) {
+            ans[i][j] = max(ans[i + 1][j], ans[i + 1][j + 1]) + g[i][j];
+        }
+    }
+    cout << ans[1][1] << '\n';
+
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+```cpp
+// 自顶向下
+
+#include<bits/stdc++.h>
+
+typedef unsigned long long ULL;
+typedef long long LL;
+const int P = 131;//用于字符串哈希
+const int N = 1e3 + 10;
+using namespace std;
+int g[N][N];
+int ans[N][N];
+
+
+void sol() {
+    int r;
+    cin >> r;
+    for (int i = 1; i <= r; i++) {
+        for (int j = 1; j <= i; j++) {
+            cin >> g[i][j];
+        }
+    }
+    int m = 0;
+    for (int i = 1; i <= r; i++) {
+        for (int j = 1; j <= i; j++) {
+            ans[i][j] = max(ans[i -1 ][j - 1], ans[i - 1][j]) + g[i][j];
+            m = max(m, ans[i][j]);
+        }
+    }
+    cout << m << '\n';
+
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+
+
+## 方格DP 
+
+[P1004 [NOIP2000 提高组] ](https://www.luogu.com.cn/problem/P1004)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ULL;
+typedef long long LL;
+const int P = 131;//用于字符串哈希
+const int N = 20;
+using namespace std;
+int g[N][N], ans[N][N][N][N];
+
+void sol() {
+    int n;
+    cin >> n;
+    int x, y;
+
+    while (cin >> x >> y >> g[x][y], x) {
+    }
+
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            for (x = 1; x <= n; x++) {
+                for (y = 1; y <= n; y++) {
+                    if (i == x && j == y) {
+                        ans[i][j][x][y] = max(
+                                max(ans[i - 1][j][x - 1][y], ans[i][j - 1][x][y - 1]),
+                                max(ans[i - 1][j][x][y - 1], ans[i][j - 1][x - 1][y])
+                        ) + g[i][j];
+                    } else {
+                        ans[i][j][x][y] = max(
+                                max(ans[i - 1][j][x - 1][y], ans[i][j - 1][x][y - 1]),
+                                max(ans[i - 1][j][x][y - 1], ans[i][j - 1][x - 1][y])
+                        ) + g[i][j] + g[x][y];
+                    }
+                }
+            }
+        }
+    }
+    cout << ans[n][n][n][n] << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+董晓：
+
+```cpp
+#include <iostream>
+using namespace std;
+
+const int N=11;
+int a[N][N];
+int f[N][N][N][N];
+
+int main(){
+  int n, x, y;
+  cin>>n;  
+  while(cin>>x>>y>>a[x][y], x);
+  
+  for(int i=1; i<=n; i++)
+  for(int j=1; j<=n; j++)
+  for(int x=1; x<=n; x++)
+  for(int y=1; y<=n; y++)
+    if(i+j==x+y){
+      int &t=f[i][j][x][y];
+      t=max(max(f[i-1][j][x-1][y], f[i-1][j][x][y-1]),
+            max(f[i][j-1][x-1][y], f[i][j-1][x][y-1]));
+      if(i==x && j==y) t+=a[i][j]; //走到同一点
+      else t+=a[i][j]+a[x][y];
+    }
+    
+  cout<<f[n][n][n][n];
+}
+```
+
+```cpp
+// 利用约束条件，降维优化，令 i+j=x+y=k 表示走的步数
+// f[k,i,x]表示共走了k步，两人分别走到i行x行，取数的最大值
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+const int N=11;
+int a[N][N];
+int f[N+N][N][N];
+
+int main(){
+  int n, x, y;
+  cin>>n;
+  while(cin>>x>>y>>a[x][y], x);
+  
+  for(int k=2; k<=n+n; k++)     //走了k步
+    for(int i=1; i<=n; i++)     //走到i行
+      for(int x=1; x<=n; x++){  //走到x行
+        int j=k-i, y=k-x;
+        if(j>=1&&j<=n&&y>=1&&y<=n){
+          int &t=f[k][i][x];
+          t=max(max(f[k-1][i-1][x-1],f[k-1][i-1][x]),
+                max(f[k-1][i][x-1], f[k-1][i][x]));
+          if(i==x) t+=a[i][j];
+          else t+=a[i][j]+a[x][y];
+        }
+      }
+  cout<<f[n+n][n][n];
+}
+```
+
+
+
+[P1006 [NOIP2008 提高组] 传纸条 ](https://www.luogu.com.cn/problem/P1006)
+
+```cpp
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+const int N=55;
+int a[N][N];
+int f[N+N][N][N];
+
+int main(){
+  int m,n; cin>>m>>n;
+  for(int i=1; i<=m; i++)
+    for(int j=1; j<=n; j++)cin>>a[i][j];
+  
+  for(int k=2; k<=m+n; k++) //步数
+  for(int i=1; i<=m; i++)   //行
+  for(int x=1; x<=m; x++){  //行
+    int j=k-i, y=k-x;
+    if(j<1 || j>n || y<1 || y>n) continue;
+    int &t=f[k][i][x];
+    t=max(max(f[k-1][i-1][x-1],f[k-1][i-1][x]), 
+          max(f[k-1][i][x-1], f[k-1][i][x]));
+    if(i==x) t+=a[i][j]; 
+    else t+=a[i][j]+a[x][y]; 
+  }
+  
+  cout<<f[m+n][m][m];
+}
+```
+
+
+
+
+
+
+
+## 线性DP
+
+###  最长上升子序列
+
+
+
+[B3637 最长上升子序列 ](https://www.luogu.com.cn/problem/B3637)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ULL;
+typedef long long LL;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+
+
+void sol() {
+    int n;
+    cin >> n;
+    vector<int> a1(n);
+    vector<int> a2(n);
+    for (int i = 0; i < n; i++) {
+        cin >> a1[i];
+        a2[i] = 1;
+    }
+    int ans = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j <= i; j++) {
+            if (a1[j] < a1[i]) {
+                a2[i] = max(a2[j] + 1, a2[i]);
+                ans = max(a2[i], ans);
+            }
+        }
+    }
+    cout << ans << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+![image-20240826114412916](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240826114412916.png)
+
+![image-20240826114426598](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240826114426598.png)
+
+
+
+### 最长上升子序列（二分优化）
+
+![image-20240826122244306](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240826122244306.png)
+
+
+
+![image-20240826122305853](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240826122305853.png)
+
+![image-20240826122325676](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240826122325676.png)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ULL;
+typedef long long LL;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+int b[N];
+int ans;
+
+void find_min(int x) {
+    int l = 0, r = ans;
+    while (r > l) {
+        int mid = l + r >> 1;
+        if (b[mid] >= x) {
+            r = mid;
+        } else {
+            l = mid + 1;
+        }
+    }
+    b[r] = x;
+    ans = max(r, ans);
+}
+
+void sol() {
+    int n;
+    cin >> n;
+    int x;
+    ans = 0;
+    b[0] = -1;
+    for (int i = 0; i < n; i++) {
+        cin >> x;
+        if(x>b[ans]){
+            b[++ans] = x;
+        }else{
+            find_min(x);
+        }
+    }
+    cout << ans << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+董晓：
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int N=100010;
+int n, a[N];
+int len, b[N]; //记录上升子序列
+
+int main(){
+  scanf("%d", &n);
+  for(int i=0; i<n; i++) scanf("%d", &a[i]);
+
+  b[0]=-2e9;                              //哨兵
+  for(int i=0; i<n; i++)
+    if(b[len]<a[i]) b[++len]=a[i];        //新数大于队尾数，则插入队尾
+    else *lower_bound(b,b+len,a[i])=a[i]; //替换第一个大于等于a[i]的数(贪心)
+
+  printf("%d\n", len);
+}
+```
+
+
+
+### 最长公共子序列（LCS）
+
+[P1439 【模板】最长公共子序列 ](https://www.luogu.com.cn/problem/P1439)
+
+![image-20240826135402906](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240826135402906.png)
+
+![image-20240826140014539](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240826140014539.png)
+
+![image-20240826143225630](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240826143225630.png)
+
+![image-20240826143748728](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240826143748728.png)
+
+
+
+```cpp
+//朴素算法
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int N=1010;
+int n, m;
+char a[N], b[N];
+int f[N][N];
+
+int main(){
+  cin>>n>>m>>a+1>>b+1;
+  
+  for(int i=1; i<=n; i++)
+    for(int j=1; j<=m; j++)
+      if(a[i]==b[j]) f[i][j]=f[i-1][j-1]+1;
+      else f[i][j]=max(f[i-1][j-1],max(f[i-1][j],f[i][j-1]));
+  
+  cout<<f[n][m];
+}
+```
+
+**CSDN解：**
+
+```cpp
+#include <bits/stdc++.h>
+
+using namespace std;
+const int maxn=100005;
+int a[maxn],lower[maxn],idx[maxn];
+int LIS(int n) {
+    int index=0;
+    for(int i=1;i<=n;i++) {
+        if(index==0||a[i]>lower[index-1]){
+            lower[index++]=a[i];
+        }else {
+            int pos=upper_bound(lower,lower+index,a[i])-lower;
+            lower[pos]=a[i];
+        }
+    }
+    return index;
+
+}
+int main() {
+    int n,temp;
+    cin>>n;
+    for(int i=1;i<=n;i++) cin>>a[i];
+    for(int i=1;i<=n;i++) { cin>>temp;idx[temp]=i;}
+    for(int i=1;i<=n;i++) {
+        a[i]=idx[a[i]];
+    }
+    int ans=LIS(n);
+    cout<<ans<<endl;
+
+    return 0;
+}
+
+
+```
+
+**我的：**
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ULL;
+typedef long long LL;
+const int P = 131;//用于字符串哈希
+const int N = 1e5 + 10;
+using namespace std;
+
+void sol() {
+    int n;
+    cin >> n;
+    map<int, int> m;
+    int b[n + 1];
+    for (int i = 1; i <= n; i++) {
+        int x;
+        cin >> x;
+        m[x] = i;
+    }
+    for (int i = 1; i <= n; i++) {
+        int x;
+        cin >> x;
+        b[i] = m[x];
+    }
+    int p[n + 1];
+    memset(p, 0, sizeof(p));
+    p[1] = -1;
+    int ans = 1;
+    for (int i = 1; i <= n; i++) {
+        if (b[i] > p[ans]) {
+            p[++ans] = b[i];
+        } else {
+            *lower_bound(p + 1, p + ans, b[i]) = b[i];
+        }
+    }
+    cout << ans - 1 << '\n';
+}
+
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+[P2516 [HAOI2010] 最长公共子序列 ](https://www.luogu.com.cn/problem/P2516)
+
+**CSDN**
+
+[洛谷P2516 [HAOI2010]最长公共子序列 动态规划_](https://blog.csdn.net/Jay_fearless/article/details/113944091?ops_request_misc=&request_id=&biz_id=102&utm_term=P2516&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduweb~default-3-113944091.142^v100^pc_search_result_base6&spm=1018.2226.3001.4187)
+
+```CPP
+#include<bits/stdc++.h>
+
+using namespace std;
+const int N = 5010, mod = 1e8;
+int f[2][N], cnt[2][N];  //为防止内存溢出MLE，使用滚动数组，因为每个状态只与上一个状态有关
+char s[N], t[N];
+
+int main() {
+    scanf("%s%s", s + 1, t + 1);
+    int n = strlen(s + 1) - 1, m = strlen(t + 1) - 1;
+    for (int i = 0; i <= m; i++)   //初始化，长度为0最长子序列方案数为1（第一个序列长度为0） 
+        cnt[0][i] = 1;
+    cnt[1][0] = 1;    //初始化，长度为0最长子序列方案数为1（第二个序列长度为0） 
+
+    for (int i = 1; i <= n; i++) {
+        int now = i & 1, pre = now ^ 1;  //当前状态为now,前一个状态为pre
+        for (int j = 1; j <= m; j++) {
+            f[now][j] = max(f[pre][j], f[now][j - 1]);   //最长公共子序列前两种情况
+            cnt[now][j] = 0;
+            if (s[i] == t[j]) {
+                f[now][j] = max(f[now][j], f[pre][j - 1] + 1); //最长公共子序列第三种种情况
+                if (f[now][j] == f[pre][j - 1] + 1)
+                    cnt[now][j] = cnt[pre][j - 1];     //如果此时满足当前序列f[now][j]等于上一序列f[pre][j-1]+1，cnt当前状态则从上一个状态转移过来
+            } else {
+                if (f[now][j] == f[pre][j - 1])
+                    cnt[now][j] -= cnt[pre][j - 1];  //s[i]!=t[j]并且满足当前序列f[now][j]等于上一序列f[pre][j-1],cnt要减去上一状态的数目，防止重复
+            }
+            if (f[now][j] == f[pre][j])
+                cnt[now][j] = (cnt[now][j] + cnt[pre][j]) % mod; //状态是从f[i-1][j]转移来的，cnt[i][j]要加上cnt[i-1][j]
+            if (f[now][j] == f[now][j - 1])
+                cnt[now][j] = (cnt[now][j] + cnt[now][j - 1]) % mod; //状态是从f[i][j-1]转移来的，cnt[i][j]要加上cnt[i][j-1]
+
+        }
+    }
+    printf("%d\n", f[n & 1][m]);
+    printf("%d\n", cnt[n & 1][m]);
+    return 0;
+}
+```
+
+
+
+
+
+
+
+### 最长公共子串
+
+
+
+```cpp
+#include<iostream>
+#include<cstring>
+using namespace std;
+
+char a[200]="BCCABCCB";
+char b[200]="AACCAB";
+int f[201][201];
+
+int main(){
+  int ans=0;
+  for(int i=1; i<=strlen(a); i++){
+    for(int j=1; j<=strlen(b); j++){
+      if(a[i-1]==b[j-1]) f[i][j]=f[i-1][j-1]+1;
+      else f[i][j]=0;
+      ans=max(ans,f[i][j]);
+    }
+  }
+  printf("ans=%d\n",ans);
+  return 0;
+}
+```
+
+![image-20240827182919628](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240827182919628.png)
+
+![image-20240827182935764](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240827182935764.png)
+
+![image-20240827182951002](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240827182951002.png)
+
+### 编辑距离
+
+[P2758 编辑距离 ](https://www.luogu.com.cn/problem/P2758)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ULL;
+typedef long long LL;
+const int P = 131;//用于字符串哈希
+const int N = 2010;
+using namespace std;
+int p[N][N];
+
+void sol() {
+    memset(p, 0, sizeof(p));
+    string s1, s2;
+    cin >> s1 >> s2;
+    int n1 = s1.size(), n2 = s2.size();
+
+    for(int i=1;i<=n1;i++){
+        p[i][0] = i;
+    }
+    for(int i=1;i<=n2;i++){
+        p[0][i] = i;
+    }
+
+    for (int i = 1; i <= n1; i++) {
+        for (int j = 1; j <= n2; j++) {
+            if (s1[i-1] == s2[j-1]) {
+                p[i][j] = p[i - 1][j - 1];
+            } else {
+                p[i][j] = min(p[i - 1][j - 1], min(p[i][j - 1], p[i - 1][j])) + 1;
+            }
+        }
+    }
+    cout << p[n1][n2] << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+![image-20240827185224886](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240827185224886.png)
+
+
+
+![image-20240827185245222](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240827185245222.png)
+
+![image-20240827185306113](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240827185306113.png)
+
+![image-20240827185315967](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240827185315967.png)
+
+### 大盗阿福
+
+![image-20240920205038623](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240920205038623.png)
+
+![image-20240920205108111](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240920205108111.png)
+
+![image-20240920205159832](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240920205159832.png)
+
+![image-20240920205210737](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240920205210737.png)
+
+### 股票买卖
+
+![image-20240925143037158](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925143037158.png)
+
+![image-20240925143103999](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925143103999.png)
+
+![image-20240925143127513](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925143127513.png)
+
+
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+int a[N];
+int dp[N][2];
+
+void sol() {
+    int n;
+    cin >> n;
+    for (int i = 1; i <= n; i++) {
+        cin >> a[i];
+    }
+    dp[0][1] = -1e9, dp[0][0] = 0;
+    for (int i = 1; i <= n; i++) {
+        dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] + a[i]);
+        dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - a[i]);
+    }
+    cout << dp[n][0] << '\n';
+
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 1;
+    //cin>>t;
+    while (t--) {
+        sol();
+    }
+}
+```
+
+### 股票买卖k笔交易
+
+![image-20240925143201984](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925143201984.png)
+
+![image-20240925143234936](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925143234936.png)
+
+![image-20240925143259038](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925143259038.png)
+
+
+
+```cpp
+#include<iostream>
+#include<cstring>
+
+using namespace std;
+
+const int N = 100010, M = 110;
+int w[N], f[M][2];
+
+int main() {
+    int n, k;
+    cin >> n;
+    k = 2;
+    for (int i = 1; i <= n; i++) cin >> w[i];
+
+    for (int j = 0; j <= k; j++) f[j][1] = -1e6;
+
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= k; j++) {
+            f[j][0] = max(f[j][0], f[j][1] + w[i]);
+            f[j][1] = max(f[j][1], f[j - 1][0] - w[i]);
+        }
+    cout << f[k][0];
+}
+```
+
+### 股票买卖含冷冻期
+
+![image-20240925143444625](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925143444625.png)
+
+![image-20240925143616787](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925143616787.png)
+
+![image-20240925143642269](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925143642269.png)
+
+```
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5+10;
+using namespace std;
+int a[N];
+int dp[N][3];
+
+void sol() {
+    int n;
+    cin >> n;
+    for (int i = 1; i <= n; i++) {
+        cin >> a[i];
+    }
+    dp[0][1] = dp[0][0] = -1e9, dp[0][2] = 0;
+    for (int i = 1; i <= n; i++) {
+        dp[i][1] = max(dp[i - 1][2] - a[i], dp[i - 1][1]);
+        dp[i][0] = dp[i - 1][1] + a[i];
+        dp[i][2] = max(dp[i - 1][0], dp[i - 1][2]);
+    }
+    cout << max(dp[n][0],dp[n][2]) << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 1;
+    //cin>>t;
+    while (t--) {
+        sol();
+    }
+}
+```
+
+
+
+## 状压DP
+
+### 互不侵犯
+
+[Luogu P1896 [SCOI2005] 互不侵犯](https://www.luogu.com.cn/problem/P1896)
+
+![image-20240925160341627](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925160341627.png)
+
+![image-20240925160406943](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925160406943.png)
+
+![image-20240925160420667](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925160420667.png)
+
+![image-20240925160443387](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925160443387.png)
+
+![image-20240925160514892](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925160514892.png)
+
+
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+ll dp[12][144][(1 << 10)];
+int s[(1 << 12)], num[(1 << 12)];
+
+void sol() {
+    int n, k;
+    cin >> n >> k;
+    int cnt = 0;
+    for (int i = 0; i < (1 << n); i++) {
+        if (!(i & (i >> 1))) {
+            s[cnt++] = i;
+            for (int j = 0; j < n; j++) {
+                num[i] += (i >> j) & 1;
+            }
+        }
+    }
+    dp[0][0][0] = 1;
+    for (int i = 1; i <= n + 1; i++) {
+        for (int j = 0; j <= k; j++) {
+            for (int a = 0; a < cnt; a++) {
+                for (int b = 0; b < cnt; b++) {
+                    int c = num[s[a]];
+                    if ((j >= c)
+                        && !(s[a] & s[b])
+                        && !(s[a] & (s[b] >> 1))
+                        && !(s[a] & (s[b] << 1))) {
+                        dp[i][j][a] += dp[i - 1][j - c][b];
+                    }
+                }
+            }
+        }
+    }
+    cout << dp[n + 1][k][0] << '\n';
+
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 1;
+    //cin>>t;
+    while (t--) {
+        sol();
+    }
+}
+```
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std; 
+
+int n,k;        //棋盘行数，国王总数
+int cnt;        //一行的合法状态个数
+int s[1<<12];   //一行的合法状态集
+int num[1<<12]; //每个合法状态包含的国王数
+long long f[12][144][1<<12];
+//f[i,j,a]表示前i行已放了j个国王，第i行的第a个状态时的方案数 
+
+int main(){
+  cin>>n>>k;
+  for(int i=0; i<(1<<n); i++) //枚举一行的所有状态
+    if(!(i & i>>1)){          //如果不存在相邻的1
+      s[cnt++]=i;             //一行的合法状态集，例101
+      for(int j=0; j<n; j++)
+        num[i]+=(i>>j & 1);   //每个合法状态包含的国王数
+    }
+  
+  f[0][0][0]=1;                   //边界
+  for(int i=1; i<=n+1; i++)       //枚举行
+    for(int j=0; j<=k; j++)       //枚举国王数
+      for(int a=0; a<cnt; a++)    //枚举第i行的合法状态
+        for(int b=0; b<cnt; b++)  //枚举第i-1行的合法状态
+        {
+          int c=num[s[a]];        //第i行第a个状态的国王数
+          if((j>=c)               //可以继续放国王
+            &&!(s[b]&s[a])        //不存在同列的1
+            &&!(s[b]&(s[a]<<1))   //不存在斜对角的1
+            &&!(s[b]&(s[a]>>1)))
+              f[i][j][a]+=f[i-1][j-c][b]; //行间转移
+        }
+  cout<<f[n+1][k][0]<<endl;       //第n+1行不放国王的方案数
+  return 0;
+}
+```
+
+
+
+
+
+
+
+### 玉米田
+
+![image-20240925182035826](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925182035826.png)
+
+![image-20240925182052229](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925182052229.png)
+
+![image-20240925182105668](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925182105668.png)
+
+![image-20240925182129546](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925182129546.png)![image-20240925182146943](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240925182146943.png)
+
+[Luogu P1879 [USACO06NOV]Corn Fields（玉米田）](https://www.luogu.com.cn/problem/P1879)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+int s[1 << 12], a[15];
+ll dp[15][1 << 12];
+const ll MOD = 1e8;
+
+void sol() {
+    int n, m;
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            int x;
+            cin >> x;
+            a[i] = (a[i] << 1) + x;
+        }
+    }
+
+    int cnt = 0;
+    for (int i = 0; i < (1 << m); i++) {
+        if (!(i & (i >> 1))) {
+            s[cnt++] = i;
+        }
+    }
+    dp[0][0] = 1;
+    for (int i = 1; i <= n + 1; i++) {
+        for (int j = 0; j < cnt; j++) {
+            for (int k = 0; k < cnt; k++) {
+                if (!(s[j] & s[k])
+                    && (s[j] & a[i]) == s[j]) {
+                    dp[i][j] = (dp[i][j] + dp[i - 1][k]) % MOD;
+                }
+            }
+        }
+    }
+    cout << dp[n + 1][0] << '\n';
+
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 1;
+    //cin>>t;
+    while (t--) {
+        sol();
+    }
+}
+```
+
+
+
+### 炮兵阵地
+
+[Luogu P2704 [NOI2001] 炮兵阵地](https://www.luogu.com.cn/problem/P2704)
+
+![image-20240926085241966](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926085241966.png)
+
+![image-20240926091249258](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926091249258.png)
+
+![image-20240926091306472](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926091306472.png)
+
+![image-20240926091321709](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926091321709.png)
+
+![image-20240926091812890](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926091812890.png)
+
+![image-20240926091824731](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926091824731.png)
+
+![image-20240926091836853](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926091836853.png)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+int dp[110][1 << 10][1 << 10], g[102], s[1 << 10], num[1 << 10];
+
+void sol() {
+    int n, m;
+    cin >> n >> m;
+    char x;
+    //初始化
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            cin >> x;
+            if (x == 'P') {
+                g[i] = (g[i] << 1) + 1;
+            } else {
+                g[i] = (g[i] << 1) + 0;
+            }
+        }
+    }
+    //预处理
+    int cnt = 0;
+    for (int i = 0; i < 1 << m; i++) {
+        if (!(i & i >> 1) && !(i & i >> 2)) {
+            s[cnt++] = i;
+            for (int j = 0; j < m; j++) {
+                num[i] += (i >> j) & 1;
+            }
+        }
+    }
+
+    int ans = 0;
+    for (int i = 1; i <= n + 2; i++) {
+        for (int a = 0; a < cnt; a++) {
+            for (int b = 0; b < cnt; b++) {
+                for (int c = 0; c < cnt; c++) {
+                    if (!(s[a] & s[b]) && !(s[a] & s[c]) && !(s[b] & s[c])
+                        && (g[i] & s[a]) == s[a] && (g[i - 1] & s[b]) == s[b]) {
+                        dp[i][a][b] = max(dp[i][a][b], dp[i - 1][b][c] + num[s[a]]);
+                        ans = max(ans, dp[i - 1][b][c] + num[s[a]]);
+                    }
+                }
+            }
+        }
+    }
+    //cout << dp[n + 2][0][0] << '\n';
+    cout << ans << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 1;
+    //cin>>t;
+    while (t--) {
+        sol();
+    }
+}
+```
+
+### Mondriaan's Dream
+
+[P10975 Mondriaan's Dream ](https://www.luogu.com.cn/problem/P10975)
+
+![image-20241002205302365](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20241002205302365.png)![image-20241002205322506](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20241002205322506.png)
+
+![image-20241002205400851](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20241002205400851.png)
+
+![image-20241002205536461](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20241002205536461.png)
+
+![image-20241002213413672](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20241002213413672.png)
+
+```cpp
+#include<iostream>
+#include<algorithm>
+#include <cstring>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+int s[1 << 12];
+ll dp[12][1 << 12];
+
+void sol() {
+    int h, w;
+    while (cin >> h >> w, h || w) {
+        //预处理
+        for (int i = 0; i < 1 << w; i++) {    //按行压缩,1表竖放并向下延长，0表横放或者上一行的延长
+            s[i] = 1;
+            int cnt = 0;
+            for (int j = 0; j < w; j++) {
+                if (i >> j & 1) {
+                    if (cnt & 1) {
+                        s[i] = 0;
+                        break;
+                    }
+                } else {
+                    cnt++;
+                }
+            }
+            if (cnt & 1) {
+                s[i] = 0;
+            }
+        }
+
+        memset(dp, 0, sizeof dp);
+        dp[0][0] = 1;
+        for (int i = 1; i <= h; i++) {
+            for (int j = 0; j < 1 << w; j++) {
+                for (int k = 0; k < 1 << w; k++) {
+                    if ((j & k) == 0 && s[j | k]) {
+                        //第一个判定是否有重叠的1，若有则表示竖放覆盖，不可取
+                        //第二个判定是否连续的奇数个0（横放）
+                        dp[i][j] += dp[i - 1][k];
+                    }
+                }
+            }
+        }
+        cout << dp[h][0] << '\n';
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 1;
+    //cin>>t;
+    while (t--) {
+        sol();
+    }
+}
+```
+
+
+
+## 树形DP
+
+### 树的重心
+
+![image-20241002214035818](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20241002214035818.png)
+
+![image-20241002214053945](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20241002214053945.png)
+
+![image-20241002214127057](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20241002214127057.png)
+
+![image-20241002214425912](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20241002214425912.png)
+
+
+
+
+
+
+
+
+
+#### 题目
+
+[Balancing Act - POJ 1655 - Virtual Judge (vjudge.net)](https://vjudge.net/problem/POJ-1655)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 区间DP
+
+### 石子合并
+
+![image-20240926095819102](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926095819102.png)
+
+![image-20240926104311495](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926104311495.png)
+
+![image-20240926104324822](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926104324822.png)
+
+![image-20240926104343036](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926104343036.png)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 4e4+10;
+using namespace std;
+int dp[N][N], sum[N];
+
+void sol() {
+    int n;
+    cin >> n;
+    vector<int> m(n + 1);
+    memset(dp, 0x3f, sizeof dp);
+
+    for (int i = 1; i <= n; i++) {
+        cin >> m[i];
+        sum[i] = sum[i - 1] + m[i];
+        dp[i][i] = 0;
+    }
+
+    for (int len = 2; len <= n; len++) {
+        for (int l = 1; l + len - 1 <= n; l++) {
+            int r = l + len - 1;
+            for (int k = l; k <= r; k++) {
+                dp[l][r] = min(dp[l][r], dp[l][k] + dp[k + 1][r] + sum[r] - sum[l - 1]);
+            }
+        }
+    }
+    cout << dp[1][n] << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 1;
+    //cin>>t;
+    while (t--) {
+        sol();
+    }
+}
+```
+
+#### 待完成
+
+[Luogu P5569 [SDOI2008] 石子合并](https://www.luogu.com.cn/problem/P5569)
+
+
+
+### 环形石子合并
+
+![image-20240926142036735](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926142036735.png)
+
+![image-20240926142151238](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926142151238.png)
+
+![image-20240926142208613](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926142208613.png)
+
+![image-20240926142217284](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926142217284.png)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 210;
+using namespace std;
+int dp[N][N], sum[N],dp1[N][N];
+
+void sol() {
+    int n;
+    cin >> n;
+    vector<int> m(2 * n + 1);
+    memset(dp, 0x3f, sizeof dp);
+    memset(dp1, -0x3f, sizeof dp1);
+
+    for (int i = 1; i <= n; i++) {
+        cin >> m[i];
+        m[i + n] = m[i];
+    }
+
+    for (int i = 1; i <= 2 * n; i++) {
+        sum[i] = sum[i - 1] + m[i];
+        dp[i][i] = 0;
+        dp1[i][i] = 0;
+    }
+
+    for (int len = 2; len <= n; len++) {
+        for (int l = 1; l + len - 1 <= 2 * n; l++) {
+            int r = l + len - 1;
+            for (int k = l; k <= r; k++) {
+                dp[l][r] = min(dp[l][r], dp[l][k] + dp[k + 1][r] + sum[r] - sum[l - 1]);
+                dp1[l][r] = max(dp1[l][r], dp1[l][k] + dp1[k + 1][r] + sum[r] - sum[l - 1]);
+            }
+        }
+    }
+    int res1 = 1e9, res2 = -1e9;
+    for (int l = 1; l <= n; l++) {
+        res1 = min(res1, dp[l][l + n - 1]);
+        res2 = max(res2, dp1[l][l + n - 1]);
+    }
+    cout << res1 << '\n' << res2 << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 1;
+    //cin>>t;
+    while (t--) {
+        sol();
+    }
+}
+```
+
+
+
+### 能量项链
+
+
+
+![image-20240926173110794](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926173110794.png)
+
+![image-20240926173128041](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926173128041.png)
+
+![image-20240926173145725](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926173145725.png)
+
+![image-20240926173208117](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926173208117.png)
+
+![image-20240926173220327](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926173220327.png)
+
+![image-20240926173230882](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240926173230882.png)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 210;
+using namespace std;
+ll dp[N][N];
+int a[N];
+
+void sol() {
+    int n;
+    cin >> n;
+
+    for (int i = 1; i <= n; i++) {
+        cin >> a[i];
+        a[i + n] = a[i];
+    }
+
+    ll res = 0;
+    for (int len = 3; len <= n+1; len++) {
+        for (int l = 1; l + len - 1 <= 2 * n; l++) {
+            int r = l + len - 1;
+            for (int k = l+1; k < r; k++) {
+                dp[l][r] = max(dp[l][r], dp[l][k] + dp[k + 1][r] +a[l]*a[k]*a[r]);
+            }
+            res = max(res,dp[l][r]);
+        }
+    }
+    cout << res << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 1;
+    //cin>>t;
+    while (t--) {
+        sol();
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 背包DP
+
+### 01背包
+
+[P2871 [USACO07DEC] Charm Bracelet S](https://www.luogu.com.cn/problem/P2871)
+
+**我的代码**
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ULL;
+typedef long long LL;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+
+struct ob {
+    int w, d;
+};
+
+void sol() {
+    int n, m;
+    cin >> n >> m;
+    vector<ob> v(n);
+    for (auto &i: v) {
+        cin >> i.w >> i.d;
+    }
+    int dp[2][m + 1];
+    memset(dp, 0, sizeof(dp));
+    int old = 1, now = 0;
+    for (int i = 0; i < n; i++) {
+        swap(old, now);
+        for (int j = 0; j <= m; j++) {
+            if (v[i].w > j) {
+                dp[now][j] = dp[old][j];
+            } else {
+                dp[now][j] = max(dp[old][j], dp[old][j - v[i].w] + v[i].d);
+            }
+        }
+    }
+    cout << dp[now][m] << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+董晓：
+
+```cpp
+// 朴素算法 MLE #2 #10
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int N=3410,M=13000;
+int n, m;
+int v[N],w[N],f[N][M];
+
+int main(){
+  scanf("%d%d",&n,&m);
+  for(int i=1; i<=n; i++) 
+    scanf("%d%d",&v[i],&w[i]);  //费用，价值
+    
+  for(int i=1; i<=n; i++)       //枚举物品
+    for(int j=1; j<=m; j++)     //枚举体积
+      if(j<v[i]) f[i][j]=f[i-1][j];            
+      else f[i][j]=max(f[i-1][j],f[i-1][j-v[i]]+w[i]);
+      
+  printf("%d\n",f[n][m]);
+}
+```
+
+```cpp
+// 滚动数组优化空间
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int N=3410,M=13000;
+int n, m;
+int v[N],w[N],f[2][M];
+
+int main(){
+  scanf("%d%d",&n,&m);
+  for(int i=1; i<=n; i++) 
+    scanf("%d%d",&v[i],&w[i]);  //费用，价值
+    
+  for(int i=1; i<=n; i++)       //枚举物品
+    for(int j=1; j<=m; j++)     //枚举体积
+      if(j<v[i]) f[i&1][j]=f[i-1&1][j];            
+      else f[i&1][j]=max(f[i-1&1][j],f[i-1&1][j-v[i]]+w[i]);
+      
+  printf("%d\n",f[n&1][m]);
+}
+```
+
+```cpp
+// 逆序枚举，优化空间#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int N=3410,M=13000;
+int n, m;
+int v[N],w[N],f[M];
+
+int main(){
+  scanf("%d%d",&n,&m);
+  for(int i=1; i<=n; i++) 
+    scanf("%d%d",&v[i],&w[i]);  //费用，价值
+    
+  for(int i=1; i<=n; i++)       //枚举物品
+    for(int j=m; j>=v[i]; j--)  //枚举体积
+      f[j]=max(f[j],f[j-v[i]]+w[i]);
+      
+  printf("%d\n",f[m]);
+}
+```
+
+[P1048 [NOIP2005 普及组] 采药](https://www.luogu.com.cn/problem/P1048)
+
+**我的**
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ULL;
+typedef long long LL;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+
+struct herbs {
+    int t, v;
+};
+
+void sol() {
+    int t, m;
+    cin >> t >> m;
+    vector<herbs> v(m + 1);
+    for (int i = 1; i <= m; i++) {
+        cin >> v[i].t >> v[i].v;
+    }
+    int dp[2][N] = {0}, old = 1, now = 0;
+    for (int i = 1; i <= m; i++) {
+        swap(old, now);
+        for (int j = 0; j <= t; j++) {
+            if (v[i].t > j) {
+                dp[now][j] = dp[old][j];
+            } else {
+                dp[now][j] = max(dp[old][j], dp[old][j - v[i].t] + v[i].v);
+            }
+        }
+    }
+    cout << dp[now][t] << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    sol();
+}
+```
+
+**董晓**
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int N=1010;
+int n, m;
+int v[N],w[N],f[N];
+
+int main(){
+  scanf("%d%d",&m,&n);
+  for(int i=1; i<=n; i++) 
+    scanf("%d%d",&v[i],&w[i]);
+  
+  for(int i=1; i<=n; i++)       //枚举物品
+    for(int j=m; j>=v[i]; j--)  //枚举体积
+      f[j]=max(f[j],f[j-v[i]]+w[i]);
+      
+  printf("%d\n",f[m]);
+}
+```
+
+[P1049 [NOIP2001 普及组] 装箱问题 ](https://www.luogu.com.cn/problem/P1049)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+
+void sol() {
+    int v, n;
+    cin >> v >> n;
+    vector<int> ob(n + 1);
+    for (int i = 1; i <= n; i++) {
+        cin >> ob[i];
+    }
+
+    int dp[2][N] = {0}, old = 1, now = 0;
+    for (int i = 1; i <= n; i++) {
+        swap(old, now);
+        for (int j = 0; j <= v; j++) {
+            if (ob[i] > j) {
+                dp[now][j] = dp[old][j];
+            } else {
+                dp[now][j] = max(dp[old][j], dp[old][j - ob[i]] + ob[i]);
+            }
+        }
+    }
+
+    cout << v - dp[now][v] << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+**董晓**
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+int m,n;
+int v[35],f[20005];
+
+int main(){
+  scanf("%d%d",&m,&n);
+  for(int i=1;i<=n;i++) scanf("%d",&v[i]);
+  for(int i=1;i<=n;i++)
+    for(int j=m;j>=v[i];j--)
+      f[j]=max(f[j], f[j-v[i]]+v[i]);
+  
+  printf("%d\n",m-f[m]);
+}
+```
+
+[P1060 [NOIP2006 普及组] 开心的金明 ](https://www.luogu.com.cn/problem/P1060)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+
+struct ob {
+    int v, p;
+};
+
+void sol() {
+    int n, m;
+    cin >> n >> m;
+    vector<ob> v(m + 1);
+    for (int i = 1; i <= m; i++) {
+        cin >> v[i].v >> v[i].p;
+    }
+
+    ll dp[2][N];
+    int old = 1, now = 0;
+
+    for (int i = 1; i <= m; i++) {
+        swap(now, old);
+        for (int j = 0; j <= n; j++) {
+            if (v[i].v > j) {
+                dp[now][j] = dp[old][j];
+            } else {
+                dp[now][j] = max(dp[old][j], dp[old][j - v[i].v] + v[i].v * v[i].p);
+            }
+        }
+    }
+    cout << dp[now][n] << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+**董晓**
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+int n, m;
+int v[30],w[30],f[30005];
+
+int main(){
+  scanf("%d%d",&m,&n);
+  for(int i=1; i<=n; i++){
+    scanf("%d%d",&v[i],&w[i]);
+    w[i]*=v[i];
+  }
+  
+  for(int i=1; i<=n; i++)       //枚举物品
+    for(int j=m; j>=v[i]; j--)  //枚举体积
+      f[j]=max(f[j],f[j-v[i]]+w[i]);
+      
+  printf("%d\n",f[m]);
+}
+```
+
+[P2639 [USACO09OCT] Bessie's Weight Problem ](https://www.luogu.com.cn/problem/P2639)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+
+void sol() {
+    int v, n;
+    cin >> v >> n;
+    vector<int> ob(n + 1);
+    for (int i = 1; i <= n; i++) {
+        cin >> ob[i];
+    }
+
+    int dp[2][N] = {0}, old = 1, now = 0;
+    for (int i = 1; i <= n; i++) {
+        swap(old, now);
+        for (int j = 0; j <= v; j++) {
+            if (ob[i] > j) {
+                dp[now][j] = dp[old][j];
+            } else {
+                dp[now][j] = max(dp[old][j], dp[old][j - ob[i]] + ob[i]);
+            }
+        }
+    }
+
+    cout << dp[now][v] << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+
+
+### 完全背包
+
+![image-20240829141551001](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829141551001.png)
+
+![image-20240829141612371](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829141612371.png)
+
+![image-20240829141635237](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829141635237.png)
+
+![image-20240829141649512](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829141649512.png)
+
+![image-20240829141702010](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829141702010.png)
+
+![image-20240829141712035](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829141712035.png)
+
+
+
+```cpp
+// 优化决策
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int N=1010;
+int n, m;
+int v[N],w[N],f[N][N];
+
+int main(){
+  scanf("%d%d",&n,&m);
+  for(int i=1; i<=n; i++) 
+    scanf("%d%d",&v[i],&w[i]);  //费用，价值
+  
+  for(int i=1; i<=n; i++)       //枚举物品
+    for(int j=1; j<=m; j++)     //枚举体积
+      if(j<v[i]) f[i][j]=f[i-1][j];
+      else f[i][j]=max(f[i-1][j],f[i][j-v[i]]+w[i]);         
+      
+  printf("%d\n",f[n][m]);
+}
+```
+
+```cpp
+// 优化决策+滚动数组优化空间
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int N=1010;
+int n, m;
+int v[N],w[N],f[2][N];
+
+int main(){
+  scanf("%d%d",&n,&m);
+  for(int i=1; i<=n; i++) 
+    scanf("%d%d",&v[i],&w[i]);  //费用，价值
+  
+  for(int i=1; i<=n; i++)       //枚举物品
+    for(int j=1; j<=m; j++)     //枚举体积
+      if(j<v[i]) f[i&1][j]=f[i-1&1][j];
+      else f[i&1][j]=max(f[i-1&1][j],f[i&1][j-v[i]]+w[i]);         
+      
+  printf("%d\n",f[n&1][m]);
+}
+```
+
+```cpp
+// 优化决策+优化空间
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int N=1010;
+int n, m;
+int v[N],w[N],f[N];
+
+int main(){
+  scanf("%d%d",&n,&m);
+  for(int i=1; i<=n; i++) 
+    scanf("%d%d",&v[i],&w[i]);  //费用，价值
+  
+  for(int i=1; i<=n; i++)       //枚举物品
+    for(int j=v[i]; j<=m; j++)  //枚举体积
+      f[j]=max(f[j],f[j-v[i]]+w[i]);
+      
+  printf("%d\n",f[m]);
+}
+```
+
+
+
+[P1616 疯狂的采药 ](https://www.luogu.com.cn/problem/P1616)
+
+**我的**
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+
+void sol() {
+    int t, m;
+    cin >> t >> m;
+    vector<pair<int, int>> v(m + 1);
+    for (int i = 1; i <= m; i++) {
+        cin >> v[i].first >> v[i].second;
+    }
+
+    vector<ll> dp(t + 1);
+    for (int i = 1; i <= m; i++) {
+        for (int j = v[i].first; j <= t; j++) {
+            dp[j] = max(dp[j], dp[j - v[i].first] + v[i].second);
+        }
+    }
+    cout << dp[t] << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+### 多重背包 二进制优化
+
+
+
+![image-20240829144235106](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829144235106.png)
+
+![image-20240829144410570](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829144410570.png)
+
+![image-20240829144427062](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829144427062.png)
+
+![image-20240829144440737](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829144440737.png)
+
+```cpp
+//自我滚动优化的普通01背包解法
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+const int N=210;
+int n, m;
+int v[N], w[N], s[N];
+int f[N];
+
+int main(){
+  scanf("%d%d",&n,&m);
+  for(int i=1; i<=n; i++) 
+    scanf("%d%d%d",&v[i],&w[i],&s[i]);  //费用,价值,数量
+  
+  for(int i=1; i<=n; i++)               //阶段：物品
+  for(int j=m; j>=v[i]; j--)            //状态：体积
+  for(int k=0; k<=s[i]&&k*v[i]<=j; k++) //决策：个数
+    f[j]=max(f[j],f[j-k*v[i]]+k*w[i]);
+    
+  printf("%d\n",f[m]);
+}
+```
+
+```cpp
+//二进制优化
+#include<iostream>
+using namespace std;
+
+const int N=2005; //2000<2^12
+int n,m;
+int v1,w1,s;
+int v[N*12],w[N*12];
+int f[N];
+
+int main(){
+  cin>>n>>m;
+  // 二进制拆分
+  int num=1; 
+  for(int i=1;i<=n;i++){
+    cin>>v1>>w1>>s;
+    for(int j=1;j<=s;j<<=1){
+      v[num]=j*v1; w[num++]=j*w1;
+      s-=j;
+    }
+    if(s) v[num]=s*v1, w[num++]=s*w1;
+  }
+  // 01背包
+  for(int i=1;i<num;i++) 
+    for(int j=m;j>=v[i];j--)
+      f[j]=max(f[j],f[j-v[i]]+w[i]);  
+  cout<<f[m];
+}
+```
+
+[P1776 宝物筛选](https://www.luogu.com.cn/problem/P1776)
+
+**自己**
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+
+void sol() {
+    int n, W;
+    cin >> n >> W;
+    int num = 1;
+    vector<pair<int, int>> vector1(N);
+    for (int i = 1; i <= n; i++) {
+        int v, w, m;
+        cin >> v >> w >> m;
+        for (int j = 1; j <= m; j <<= 1) {
+            vector1[num++] = {v * j, w * j};
+            m -= j;
+        }
+        if (m) {
+            vector1[num++] = {v * m, w * m};
+        }
+    }
+    int dp[N] = {0};
+    for (int i = 1; i < num; i++) {
+        for (int j = W; j >= vector1[i].second; j--) {
+            dp[j] = max(dp[j], dp[j - vector1[i].second] + vector1[i].first);
+        }
+    }
+    cout << dp[W] << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+
+
+### 多重背包 单调队列优化
+
+[Luogu P1776 宝物筛选](https://www.luogu.com.cn/problem/P1776)
+
+![image-20240913115602789](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240913115602789.png)
+
+![image-20240913115723351](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240913115723351.png)
+
+![image-20240913120034614](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240913120034614.png)
+
+![image-20240913120558618](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240913120558618.png)
+
+![image-20240913121012005](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240913121012005.png)
+
+![image-20240913121442252](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240913121442252.png)
+
+ ![image-20240913121504507](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240913121504507.png)
+
+![image-20240913125048663](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240913125048663.png)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+
+void sol() {
+    int n, W;
+    cin >> n >> W;
+    int dp[N] = {0}, f[N];
+    int q[N] = {0};
+    for (int i = 0; i < n; i++) {
+        int v, w, m;
+        cin >> v >> w >> m;
+        memcpy(f, dp, sizeof dp);
+        for (int j = 0; j < w; j++) {
+            int h = 0, t = -1;
+            for (int k = j; k <= W; k += w) {
+                while (h <= t && q[h] < k - m * w) {
+                    h++;
+                }
+                if (h <= t) {
+                    dp[k] = max(f[k], f[q[h]] + (k - q[h]) / w * v);
+                }
+                while (h <= t && f[k] >= f[q[t]] + (k - q[t]) / w * v) {
+                    t--;
+                }
+                q[++t] = k;
+            }
+        }
+    }
+    cout << dp[W] << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+**D**
+
+```cpp
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+const int N=40005;
+int n,W,w,v,m;
+int f[N],g[N];
+int q[N];
+
+int main(){
+  scanf("%d%d",&n,&W);        //宝物种数,最大载重
+  for(int i=1;i<=n;i++){      //枚举宝物
+    memcpy(g,f,sizeof(f));    //f备份到g       
+    scanf("%d%d%d",&v,&w,&m); //价值 重量 数量
+    for(int j=0;j<w;j++){     //分拆成w个类 
+      int h=1,t=0;            //对每个类使用单调队列　　
+      for(int k=j;k<=W;k+=w){ //滑动窗口[k-m*w,k-w]
+        while(h<=t && q[h]<k-m*w) h++;   
+        while(h<=t && g[k]>=g[q[t]]+(k-q[t])/w*v) t--;
+        q[++t]=k;
+        if(h<=t) f[k]=max(g[k],g[q[h]]+(k-q[h])/w*v);
+      }
+    }
+  }
+  printf("%d\n",f[W]);
+}
+```
+
+### 混合背包
+
+![image-20240913184544653](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240913184544653.png)
+
+![image-20240913184718895](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240913184718895.png)
+
+![image-20240913184731541](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240913184731541.png)
+
+```cpp
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+int n, m;
+int f[1010],g[1010];
+int q[1010];
+
+void ZeroOnePack(int v,int w){
+  for(int j=m; j>=v; j--)
+    f[j]=max(f[j],f[j-v]+w);
+} 
+void CompletePack(int v,int w){
+  for(int j=v; j<=m; j++)
+    f[j]=max(f[j],f[j-v]+w);
+}
+void MultiplePack(int v,int w,int s){
+  memcpy(g,f,sizeof(f));      
+  for(int j=0;j<v;j++){
+    int h=0,t=-1;
+    for(int k=j;k<=m;k+=v){
+      if(h<=t && q[h]<k-s*v) h++;
+      if(h<=t) f[k]=max(g[k],g[q[h]]+(k-q[h])/v*w);
+      while(h<=t&& g[k]>=g[q[t]]+(k-q[t])/v*w) t--;
+      q[++t]=k;
+    }
+  }
+}
+int main(){
+  int v, w, s;   
+  cin >> n >> m;
+  for(int i=1; i<=n; i++){
+    scanf("%d %d %d",&v,&w,&s);
+    if(s==-1)
+        ZeroOnePack(v,w);     //01背包 
+    else if(s==0)
+        CompletePack(v,w);    //完全背包 
+    else
+        MultiplePack(v,w,s);  //多重背包 
+  }
+  cout<<f[m];
+}
+```
+
+[Luogu P1833 樱花](https://www.luogu.com.cn/problem/P1833)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e3 + 10;
+using namespace std;
+
+void sol() {
+    int h1, h2, m1, m2, n;
+    char cc;
+    cin >> h1 >> cc >> m1 >> h2 >> cc >> m2 >> n;
+    int sum_t = (h2 - h1) * 60 + (m2 - m1);
+    int dp[N] = {0}, g[N], q[N] = {0};
+
+    for (int i = 0; i < n; i++) {
+        int t, c, p;
+        cin >> t >> c >> p;
+
+        memcpy(g, dp, sizeof(dp));
+        for (int j = 0; j < t; j++) {
+            int head = 0, tail = -1;
+            for (int k = j; k <= sum_t; k += t) {
+                while (head <= tail && q[head] < k - p * t && p) {
+                    head++;
+                }
+                if (head <= tail) {
+                    dp[k] = max(g[k], g[q[head]] + (k - q[head]) / t * c);
+                }
+                while (head <= tail && g[k] >= g[q[tail]] + (k - q[tail]) / t * c) {
+                    tail--;
+                }
+                q[++tail] = k;
+            }
+        }
+    }
+    cout << dp[sum_t] << '\n';
+
+
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+
+
+### 二维费用背包
+
+[Luogu P1855 榨取kkksc03](https://www.luogu.com.cn/problem/P1855)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 210;
+using namespace std;
+
+void sol() {
+    int n, m, t, x, y;
+    cin >> n >> m >> t;
+    int dp[N][N] = {0};
+    for (int i = 1; i <= n; i++) {
+        cin >> x >> y;
+        for (int j = m; j >= x; j--) {
+            for (int k = t; k >= y; k--) {
+                dp[j][k] = max(dp[j][k], dp[j - x][k - y] + 1);
+            }
+        }
+    }
+    cout<<dp[m][t]<<'\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+![image-20240913191139122](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240913191139122.png)![image-20240913191154649](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240913191154649.png)
+
+### 分组背包
+
+
+
+[Luogu P1757 通天之分组背包](https://www.luogu.com.cn/problem/P1757)
+
+```
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1010;
+using namespace std;
+
+void sol() {
+    int n, m;
+    cin >> m >> n;
+    int t = 0;
+    vector<pair<int, int>> v[N];
+    for (int i = 1; i <= n; i++) {
+        int x, y, z;
+        cin >> x >> y >> z;
+        v[z].push_back({x, y});
+        t = max(t, z);
+    }
+
+    int dp[N] = {0};
+    for (int i = 1; i <= t; i++) {
+        for (int j = m; j >= 1; j--) {
+            for (int z = 0; z < v[i].size(); z++) {
+                if (j >= v[i][z].first) {
+                    dp[j] = max(dp[j], dp[j - v[i][z].first] + v[i][z].second);
+                }
+            }
+        }
+    }
+    cout << dp[m] << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+![image-20240914095830213](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240914095830213.png)
+
+![image-20240914095950955](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240914095950955.png)
+
+![image-20240914100014179](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240914100014179.png)
+
+![image-20240914100027325](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240914100027325.png)
+
+
+
+[P1064 [NOIP2006 提高组\] 金明的预算方案 - 洛谷 | 计算机科学教育新生态 (luogu.com.cn)](https://www.luogu.com.cn/problem/P1064)
+
+```cpp
+#include<iostream>
+
+using namespace std;
+
+const int N = 33000;
+int n, W, v, p, q;
+int mw[N], mv[N], fw[N][3], fv[N][3];
+int f[N];
+
+int main() {
+    cin >> W >> n;      //W总重量，n总个数
+    for (int i = 1; i <= n; i++) {
+        cin >> v >> p >> q;
+        if (!q) {
+            mw[i] = v;    //主件重量
+            mv[i] = v * p;  //主件价值
+        } else {
+            fw[q][0]++;           //附件个数
+            fw[q][fw[q][0]] = v;    //fw附件重量
+            fv[q][fw[q][0]] = v * p;  //fv附件价值
+        }
+    }
+
+    for (int i = 1; i <= n; i++)                 //物品
+        for (int j = W; j >= mw[i]; j--) {          //体积
+            f[j] = max(f[j], f[j - mw[i]] + mv[i]);  //只选m
+            if (j >= mw[i] + fw[i][1])             //选m,a
+                f[j] = max(f[j], f[j - mw[i] - fw[i][1]] + mv[i] + fv[i][1]);
+            if (j >= mw[i] + fw[i][2])             //选m,b
+                f[j] = max(f[j], f[j - mw[i] - fw[i][2]] + mv[i] + fv[i][2]);
+            if (j >= mw[i] + fw[i][1] + fw[i][2])    //选m,a,b
+                f[j] = max(f[j], f[j - mw[i] - fw[i][1] - fw[i][2]] + mv[i] + fv[i][1] + fv[i][2]);
+        }
+    cout << f[W];
+}
+```
+
+
+
+### 方案数
+
+![image-20240920113334486](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240920113334486.png)
+
+![image-20240920113459395](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240920113459395.png)
+
+![image-20240920113707647](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240920113707647.png)
+
+ ![image-20240920113726263](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240920113726263.png)
+
+![image-20240920114132797](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240920114132797.png)
+
+
+
+```cpp
+// 不超背包容量的方案数
+#include<iostream>
+#include<cstring>
+using namespace std;
+
+const int N=1010, mod=1e9+7;
+int f[N],c[N];
+// f[i]表示背包容量为i时最优选法的总价值
+// c[i]表示背包容量为i时最优选法的方案数
+
+int main(){
+  int n, m, v, w;   
+  scanf("%d%d", &n, &m);    
+  for(int i=0;i<=m;i++) c[i]=1;    
+  
+  for(int i=1; i<=n; i++){    //枚举物品
+    scanf("%d%d",&v,&w);
+    for(int j=m; j>=v; j--){  //枚举体积
+      if(f[j-v]+w>f[j]){      //装新物品总价值更大
+        f[j]=f[j-v]+w;
+        c[j]=c[j-v];
+      }
+      else if(f[j-v]+w==f[j]) //装新物品总价值相等
+        c[j]=(c[j]+c[j-v])%mod;     
+    }
+  }
+  printf("%d\n",c[m]);
+}
+```
+
+ 
+
+### 求具体方案
+
+![image-20240920145456000](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240920145456000.png)
+
+![image-20240920145612755](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240920145612755.png)
+
+![image-20240920145935507](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240920145935507.png)
+
+![image-20240920150003915](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240920150003915.png)
+
+```cpp
+#include<iostream>
+#include<cstring>
+using namespace std;
+
+const int N = 1010;
+int v[N],w[N];
+int f[N][N],p[N][N];
+
+int main(){
+  int n,m; cin>>n>>m;
+  for(int i=1; i<=n; i++) cin>>v[i]>>w[i];
+  
+  for(int i=n; i>=1; i--)   //逆序取物 
+  for(int j=0; j<=m; j++){  //枚举体积
+    f[i][j]=f[i+1][j];
+    p[i][j]=j;              //记录路径列 
+    if(j>=v[i])
+      f[i][j]=max(f[i][j],f[i+1][j-v[i]]+w[i]);
+    if(j>=v[i] && f[i][j]==f[i+1][j-v[i]]+w[i])
+      p[i][j]=j-v[i];
+  }
+  
+  int j=m;
+  for(int i=1; i<=n; i++)
+    if(p[i][j]<j){
+      printf("%d ",i);
+      j=p[i][j];
+    }
+}
+```
+
+```cpp
+#include<iostream>
+#include<cstring>
+using namespace std;
+
+const int N = 1010;
+int v[N],w[N];
+int f[N],p[N][N];
+
+int main(){
+  int n,m; cin>>n>>m;
+  for(int i=1; i<=n; i++) cin>>v[i]>>w[i];
+  
+  for(int i=n; i>=1; i--)
+  for(int j=m; j>=0; j--){
+    p[i][j]=j;
+    if(j>=v[i])
+      f[j]=max(f[j],f[j-v[i]]+w[i]);
+    if(j>=v[i]&&f[j-v[i]]+w[i]==f[j])
+      p[i][j]=j-v[i];
+  }
+  
+  int j=m;
+  for(int i=1; i<=n; i++)
+    if(p[i][j]<j){      
+      printf("%d ",i);
+      j=p[i][j];
+    }
+}
+```
+
+
+
+## 树形DP
+
+### 树形DP
+
+![image-20240914204826767](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240914204826767.png)
+
+ ![image-20240914204925255](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240914204925255.png)
+
+![image-20240914205938197](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240914205938197.png)
+
+![image-20240914205949114](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240914205949114.png)
+
+![image-20240914205959168](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240914205959168.png)
+
+[Luogu P1352 没有上司的舞会](https://www.luogu.com.cn/problem/P1352)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+int n;
+vector<int> g[N];
+int s[N];
+bool fa[N];
+int dp[N][2];
+
+
+void dfs(int root) {
+    dp[root][1] = s[root];
+    for (auto i: g[root]) {
+        dfs(i);
+        dp[root][0] += max(dp[i][0], dp[i][1]);
+        dp[root][1] += dp[i][0];
+    }
+}
+
+void sol() {
+    cin >> n;
+    for (int i = 1; i <= n; i++) {
+        cin >> s[i];
+    }
+    int x, y;
+    for (int i = 1; i < n; i++) {
+        cin >> x >> y;
+        g[y].push_back(x);
+        fa[x] = true;
+    }
+    int root = 1;
+    while (fa[root]) {
+        root++;
+    }
+    dfs(root);
+    cout << max(dp[root][0], dp[root][1]);
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+
+
+**D**
+
+```cpp
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+const int N=6010;
+int n;
+int w[N];
+bool fa[N];
+int h[N],to[N],ne[N],tot; //邻接表
+int f[N][2];
+
+void add(int a,int b){
+  to[++tot]=b,ne[tot]=h[a],h[a]=tot;
+}
+void dfs(int u){
+  f[u][1]=w[u];
+  for(int i=h[u];i;i=ne[i]){
+    int v=to[i];
+    dfs(v);
+    f[u][0]+=max(f[v][0],f[v][1]);
+    f[u][1]+=f[v][0];  
+  }
+}
+int main(){
+  cin>>n;
+  for(int i=1;i<=n;i++) cin>>w[i];
+  for(int i=0;i<n-1;i++){
+    int a,b; cin>>a>>b;
+    add(b,a);
+    fa[a]=true;      
+  }
+  
+  int root=1;
+  while(fa[root]) root++; //找根节点
+  dfs(root);
+  cout<<max(f[root][0],f[root][1]);
+}
+```
+
+
+
+### 树形背包
+
+![image-20240918185641330](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240918185641330.png)
+
+![image-20240918185757770](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240918185757770.png)
+
+![image-20240918185813025](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240918185813025.png)
+
+![image-20240918185824707](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240918185824707.png)
+
+![image-20240918185844488](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240918185844488.png)
+
+![image-20240918185901249](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240918185901249.png)
+
+```cpp
+#include<iostream>
+#include<cstring>
+using namespace std;
+
+const int N=110;
+int n,V,p,root;
+int v[N],w[N]; 
+int h[N],to[N],ne[N],tot; //邻接表
+int f[N][N];
+
+void add(int a,int b){
+  to[++tot]=b;ne[tot]=h[a];h[a]=tot;
+}
+void dfs(int u){
+  for(int i=v[u];i<=V;i++) f[u][i]=w[u];
+  for(int i=h[u]; i; i=ne[i]){  //子节点 
+    int s=to[i];
+    dfs(s);
+    for(int j=V;j>=v[u];j--)    //体积
+      for(int k=0;k<=j-v[u];k++)//决策
+        f[u][j]=max(f[u][j],f[u][j-k]+f[s][k]);
+  }
+}
+int main(){
+  cin>>n>>V;              //物品个数,背包容量
+  for(int i=1;i<=n;i++){
+    cin>>v[i]>>w[i]>>p;   //体积,价值,依赖的物品编号
+    if(p==-1) root=i;
+    else add(p,i);
+  }
+  dfs(root);
+  cout<<f[root][V];
+}
+```
+
+[Luogu P2014 [CTSC1997] 选课](https://www.luogu.com.cn/problem/P2014)
+
+f[u][i][j]：以 u 点为根的子树，已经遍历了 u 的前 i 棵子树，选了 j 门课程的最大学分
+递推起点 f[u][1][1]=w[u]
+f[u][i][j]=max(f[u][i-1][j], f[u][i-1][j-k]+f[v][v的所有节点][k]), 0<j<=m+1, 0<k<j
+逆序枚举 j, 优化掉第二维
+f[u][j]=max(f[u][j], f[u][j-k]+f[v][k])
+
+虚拟根节点0：从0号点向没有先修课的课程连边，把森林转化成一颗树。0号点的为必选点，所以共选 m+1门
+
+
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 350;
+using namespace std;
+int n, m;
+int w[N];
+vector<int> to[N];
+int dp[N][N];
+
+
+void dfs(int u) {
+    dp[u][1] = w[u];
+    for (auto i: to[u]) {
+        dfs(i);
+        for (int j = m + 1; j >= 1; j--) {
+            for (int k = 0; k <= j - 1; k++) {
+                dp[u][j] = max(dp[u][j], dp[u][j - k] + dp[i][k]);
+            }
+        }
+    }
+}
+
+void sol() {
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) {
+        int x;
+        cin >> x >> w[i];
+        to[x].push_back(i);
+    }
+    dfs(0);
+    cout << dp[0][m + 1] << '\n';
+
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 1;
+    while (t--) {
+        sol();
+    }
+}
+```
+
+
+
+[Luogu P1064 [NOIP2006 提高组] 金明的预算方案](https://www.luogu.com.cn/problem/P1064)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 100;
+using namespace std;
+int n, m;
+vector<pair<int, int>> a(N);
+vector<int> to[N];
+int dp[N][33000];
+
+void dfs(int u) {
+    for (int i = a[u].first; i <= n; i++) {
+        dp[u][i] = a[u].second;
+    }
+    for (auto v: to[u]) {
+        dfs(v);
+        for (int i = n; i >= a[u].first; i--) {
+            for (int j = 0; j <= i-a[u].first; j++) {
+                dp[u][i] = max(dp[u][i], dp[u][i - j] + dp[v][j]);
+            }
+        }
+    }
+}
+
+void sol() {
+    cin >> n >> m;
+    n /= 10;
+    for (int i = 1; i <= m; i++) {
+        cin >> a[i].first >> a[i].second;
+        a[i].first /= 10;
+        a[i].second *= a[i].first;
+        int x;
+        cin >> x;
+        to[x].push_back(i);
+    }
+    dfs(0);
+    cout << dp[0][n]*10 << '\n';
+
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int t = 1;
+    //cin>>t;
+    while (t--) {
+        sol();
+    }
+}
+```
+
+
+
+### 树的重心
+
+![image-20241109144954386](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20241109144954386.png)
+
+
+
+![image-20241109151433568](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20241109151433568.png)
+
+![image-20241109151506295](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20241109151506295.png)
+
+
+
+![image-20241109151520022](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20241109151520022.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 单调队列
+
+### 滑动窗口最值
+
+![image-20240911211442284](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240911211442284.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202304/1973969-20230430144002391-844782212.png)
+
+[Luogu P1886 滑动窗口 /【模板】单调队列](https://www.luogu.com.cn/problem/P1886)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e6 + 10;
+using namespace std;
+int n, k;
+int v[N];
+
+void find_max() {
+    deque<int> dq;
+    for (int i = 1; i <= n; i++) {
+        while (!dq.empty() && v[dq.back()] <= v[i]) {
+            dq.pop_back();
+        }
+        dq.push_back(i);
+        if (i < k) {
+            continue;
+        }
+        cout << v[dq.front()] << ' ';
+        if (i - k + 1 == dq.front()) {
+            dq.pop_front();
+        }
+    }
+    cout << '\n';
+}
+
+void find_min() {
+    deque<int> dq;
+    for (int i = 1; i <= n; i++) {
+        while (!dq.empty() && v[dq.back()] >= v[i]) {
+            dq.pop_back();
+        }
+        dq.push_back(i);
+        if (i < k) {
+            continue;
+        }
+        cout << v[dq.front()] << ' ';
+        if (i - k + 1 == dq.front()) {
+            dq.pop_front();
+        }
+    }
+    cout << '\n';
+}
+
+void sol() {
+    cin >> n >> k;
+    for (int i = 1; i <= n; i++) {
+        cin >> v[i];
+    }
+    find_min();
+    find_max();
+
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+**大数据存储建议使用数组而非STL容器，容易爆**
+
+
+
+```cpp
+#include <iostream>
+using namespace std;
+
+const int N=1000010;
+int a[N], q[N];
+
+int main(){
+  int n, k; scanf("%d%d", &n, &k);
+  for(int i=1; i<=n; i++) scanf("%d", &a[i]);
+  
+  // 维护窗口最小值
+  int h=1, t=0;                       //清空队列
+  for(int i=1; i<=n; i++){            //枚举序列
+    while(h<=t && q[h]<i-k+1) h++;    //队头出队(队列不空且队头元素滑出窗口) 
+    while(h<=t && a[q[t]]>=a[i]) t--; //队尾出队(队列不空且新元素更优)
+    q[++t]=i;                         //队尾入队(存储下标 方便判断队头出队)
+    if(i>=k) printf("%d ", a[q[h]]);  //使用最值
+  }
+  puts("");
+  
+  // 维护窗口最大值
+  h=1, t=0;
+  for(int i=1; i<=n; i++){
+    while(h<=t && q[h]<i-k+1) h++;
+    while(h<=t && a[q[t]]<=a[i]) t--;
+    q[++t]=i;
+    if(i>=k) printf("%d ", a[q[h]]);
+  }
+}
+
+#include <iostream>
+#include <deque>
+using namespace std;
+
+const int N=1000010;
+int a[N];
+deque<int> q;
+
+int main(){
+  int n, k; scanf("%d%d", &n, &k);
+  for(int i=1; i<=n; i++) scanf("%d", &a[i]);
+  
+  // 维护窗口最小值
+  q.clear();                              //清空队列
+  for(int i=1; i<=n; i++){                //枚举序列
+    while(!q.empty() && a[q.back()]>=a[i]) q.pop_back(); //队尾出队(队列不空且新元素更优)
+    q.push_back(i);                       //队尾入队(存储下标 方便判断队头出队)          
+    while(q.front()<i-k+1) q.pop_front(); //队头出队(队头元素滑出窗口)
+    if(i>=k) printf("%d ",a[q.front()]);  //使用最值   
+  }
+  puts("");
+  
+  // 维护窗口最大值
+  q.clear();
+  for(int i=1; i<=n; i++){
+    while(!q.empty() && a[q.back()]<=a[i]) q.pop_back();
+    q.push_back(i);
+    while(q.front()<i-k+1) q.pop_front();
+    if(i>=k) printf("%d ",a[q.front()]);
+  }
+}
+```
+
+[Luogu P1440 求m区间内的最小值](https://www.luogu.com.cn/problem/P1440)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e7;
+using namespace std;
+int a[N];
+int n, k;
+
+void find_min() {
+    deque<int> dq;
+    for (int i = 1; i <= n; i++) {
+        if (i - 1 - k == dq.front()) {
+            dq.pop_front();
+        }
+        if (i == 1) {
+            cout << 0 << '\n';
+        } else {
+            cout << a[dq.front()] << '\n';
+        }
+        while (!dq.empty() && a[dq.back()] >= a[i]) {
+            dq.pop_back();
+        }
+        dq.push_back(i);
+
+    }
+}
+
+void sol() {
+    cin >> n >> k;
+    for (int i = 1; i <= n; i++) {
+        cin >> a[i];
+    }
+    find_min();
+
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+[Luogu P2032 扫描](https://www.luogu.com.cn/problem/P2032)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e7;
+using namespace std;
+int n, k;
+int a[N];
+
+void sol() {
+    cin >> n >> k;
+    for (int i = 1; i <= n; i++) {
+        cin >> a[i];
+    }
+    deque<int> dq;
+    for (int i = 1; i <= n; i++) {
+        while (!dq.empty() && a[dq.back()] <= a[i]) {
+            dq.pop_back();
+        }
+        dq.push_back(i);
+        if (i < k) {
+            continue;
+        }
+        if (i - k == dq.front()) {
+            dq.pop_front();
+        }
+        cout << a[dq.front()] << '\n';
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+
+
+[Luogu P2216 [HAOI2007\]理想的正方形](https://www.luogu.com.cn/problem/P2216)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e3 + 10;
+using namespace std;
+int a, b, n;
+int g[N][N], res = 1e9 + 10;
+int ans1[N][N], ans2[N][N];
+int ans11[N][N], ans22[N][N];
+
+void find_min() {
+    for (int i = 1; i <= a; i++) {
+        deque<int> dq;
+        for (int j = 1; j <= b; j++) {
+            while (!dq.empty() && g[i][dq.back()] >= g[i][j]){
+                dq.pop_back();
+            }
+            dq.push_back(j);
+            if(j-n == dq.front()){
+                dq.pop_front();
+            }
+            ans1[i][j] = g[i][dq.front()];
+        }
+    }
+
+    for (int j = 1; j <= b; j++) {
+        deque<int> dq;
+        for (int i = 1; i <= a; i++) {
+            while (!dq.empty() && ans1[dq.back()][j] >= ans1[i][j]){
+                dq.pop_back();
+            }
+            dq.push_back(i);
+            if(i-n == dq.front()){
+                dq.pop_front();
+            }
+            ans11[i][j] = ans1[dq.front()][j];
+        }
+    }
+}
+
+void find_max() {
+    for (int i = 1; i <= a; i++) {
+        deque<int> dq;
+        for (int j = 1; j <= b; j++) {
+            while (!dq.empty() && g[i][dq.back()] <= g[i][j]){
+                dq.pop_back();
+            }
+            dq.push_back(j);
+            if(j-n == dq.front()){
+                dq.pop_front();
+            }
+            ans2[i][j] = g[i][dq.front()];
+        }
+    }
+
+    for (int j = 1; j <= b; j++) {
+        deque<int> dq;
+        for (int i = 1; i <= a; i++) {
+            while (!dq.empty() && ans2[dq.back()][j] <= ans2[i][j]){
+                dq.pop_back();
+            }
+            dq.push_back(i);
+            if(i-n == dq.front()){
+                dq.pop_front();
+            }
+            ans22[i][j] = ans2[dq.front()][j];
+        }
+    }
+}
+
+void sol() {
+    cin >> a >> b >> n;
+    for (int i = 1; i <= a; i++) {
+        for (int j = 1; j <= b; j++) {
+            cin >> g[i][j];
+        }
+    }
+    find_min();
+    find_max();
+
+    for (int i = n; i <= a; i++) {
+        for (int j = n; j <= b; j++) {
+            res = min(res, ans22[i][j] - ans11[i][j]);
+        }
+    }
+    cout << res << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+**d**
+
+```cpp
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+const int N=1010, INF=1e9;
+int n, m, k;
+int w[N][N], minv[N][N], maxv[N][N];
+int q[N], a[N], b[N], c[N], d[N];
+// maxv[i][j]:第i行, j-k+1~j列的最大值
+// a[i]:第i行, j-k+1~j列的最大值
+// c[i]:第i-k+1~i行, j-k+1~j列的最大值
+
+void get_max(int a[], int b[], int m){
+  int h=1, t=0;
+  for(int i=1; i<=m; i++){
+    while(h<=t && a[q[t]]<=a[i]) t--;
+    q[++t]=i;
+    if(q[h]<i-k+1) h++;
+    b[i]=a[q[h]];
+  }
+}
+void get_min(int a[], int b[], int m){
+  int h=1, t=0;
+  for(int i=1; i<=m; i++){
+    while(h<=t && a[q[t]]>=a[i]) t--;
+    q[++t]=i;
+    if(q[h]<i-k+1) h++;
+    b[i]=a[q[h]];
+  }
+}
+int main(){
+  scanf("%d%d%d", &n, &m, &k);
+  for(int i=1; i<=n; i++)
+    for(int j=1; j<=m; j++) scanf("%d",&w[i][j]);
+    
+  for(int i=1; i<=n; i++){   //枚举行
+    get_max(w[i],maxv[i],m); //横滑窗口  
+    get_min(w[i],minv[i],m);
+  }
+  int res=INF;
+  for(int j=k; j<=m; j++){   //枚举列
+    for(int i=1; i<=n; i++){
+      a[i]=maxv[i][j];
+      b[i]=minv[i][j];
+    }
+    get_max(a, c, n);        //竖滑窗口
+    get_min(b, d, n);
+    for(int i=k;i<=n;i++) res=min(res,c[i]-d[i]);
+  }
+  printf("%d\n", res);
+}
+```
+
+### 连续子序列的最大和
+
+[LOJ10176 最大连续和](https://loj.ac/p/10176)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 3e5 + 10;
+using namespace std;
+int n, res = -1e9;
+vector<int> a(N);
+size_t m;
+
+void find_max_sequnce() {
+    deque<int> dq;
+    int cur = 0;
+    for (int i = 1; i <= n; i++) {
+        while (!dq.empty() && dq.front() <= 0) {
+            cur -= dq.front();
+            dq.pop_front();
+        }
+        if(cur + a[i] <= a[i]){
+            dq.clear();
+            dq.push_back(a[i]);
+            cur = a[i];
+        }else{
+            cur += a[i];
+            dq.push_back(a[i]);
+        }
+        res = max(res,cur);
+        if(dq.size() == m){
+            cur -= dq.front();
+            dq.pop_front();
+        }
+    }
+}
+
+void sol() {
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) {
+        cin >> a[i];
+    }
+    find_max_sequnce();
+    cout << res << '\n';
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+**d**
+
+```cpp
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+const int N=300010;
+int n, m;
+int s[N], f[N], q[N];
+
+int main(){
+  scanf("%d%d", &n, &m);
+  for(int i=1; i<=n; i++) 
+    scanf("%d",&s[i]),s[i]+=s[i-1]; //前缀和
+  
+  int h=1, t=0;                         //清空队列
+  for(int i=1; i<=n; i++){              //枚举序列
+    while(h<=t && q[h]<i-m) h++;        //队头出队(队列不空且队头元素滑出窗口) 
+    while(h<=t && s[q[t]]>=s[i-1]) t--; //队尾出队(队列不空且新元素更优)
+    q[++t]=i-1;                         //队尾入队(存储下标 方便判断队头出队)
+    f[i]=s[i]-s[q[h]];                  //更新答案
+  }
+
+  int res=-2e9;
+  for(int i=1; i<=n; i++)res=max(res,f[i]);
+  printf("%d\n", res);
+}
+```
+
+
+
+[Luogu P1714 切蛋糕](https://www.luogu.com.cn/problem/P1714)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 5e5 + 10;
+using namespace std;
+int s[N], p[N], f[N];
+int n, m;
+
+void sol() {
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) {
+        cin >> s[i];
+        s[i] += s[i - 1];
+    }
+
+    int h = 1, t = 0;
+    for (int i = 1; i <= n; i++) {
+        while (h <= t && p[h] < i - m) {
+            h++;
+        }
+        while (h <= t && s[p[t]] >= s[i - 1]) {
+            t--;
+        }
+        p[++t] = i - 1;
+        f[i] = s[i] - s[p[h]];
+    }
+    int res = -2e9;
+    for (int i = 1; i <= n; i++) {
+        res = max(f[i], res);
+    }
+    cout << res << '\n';
+
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+
+
+
+
+[Luogu P2629 好消息，坏消息](https://www.luogu.com.cn/problem/P2629)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 2000010;
+using namespace std;
+ll n, s[N], q[N], a[N];
+
+void sol() {
+    cin >> n;
+    for (int i = 1; i <= n; i++) {
+        cin >> a[i];
+        if (i != n) {
+            a[i + n] = a[i]; //破环成链
+        }
+    }
+    for (int i = 1; i <= 2 * n - 1; i++) {
+        s[i] = s[i - 1] + a[i]; //前缀和
+    }
+    int h = 1, t = 0, res = 0;
+    for (int i = 1; i <= 2 * n - 1; i++) {
+        //维护长度为n的单调队列，获得其中的最小值。
+        while (h <= t && q[h] <= i - n) {
+            h++;
+        }
+        while (h <= t && s[q[t]] >= s[i]) {
+            t--;
+        }
+        q[++t] = i;
+        //区间内最小s[i]-s[i-n]>=0时，此排序可选
+        if (i >= n && s[q[h]] - s[i - n] >= 0) {
+            res++;
+        }
+    }
+    cout << res << '\n';
+
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 图论
+
+## 拓扑排序
+
+![image-20240830120316960](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240830120316960.png)
+
+![image-20240830120339128](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240830120339128.png)
+
+![image-20240830120436372](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240830120436372.png)
+
+
+
+**董晓**
+
+```cpp
+///////////////////Kahn 算法  
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+using namespace std;
+const int N = 100010;
+int n,m,a,b;
+vector<int> e[N], tp;
+int din[N];
+
+bool toposort(){
+  queue<int> q;
+  for(int i = 1; i <= n; i++)
+    if(din[i]==0) q.push(i);
+  while(q.size()){
+    int x=q.front(); q.pop();
+    tp.push_back(x);
+    for(auto y : e[x]){
+      if(--din[y]==0) q.push(y);
+    }
+  }
+  return tp.size() == n;
+}
+int main(){
+  cin >> n >> m;
+  for(int i=0; i<m; i++){
+    cin >> a >> b;
+    e[a].push_back(b);
+    din[b]++;
+  }
+  if(!toposort()) puts("-1");
+  else for(auto x:tp)printf("%d ",x);
+  return 0;
+}
+///////////////////DFS 算法
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+using namespace std;
+
+const int N = 100010;
+int n,m,a,b;
+vector<int> e[N], tp;
+int c[N]; //染色数组
+
+bool dfs(int x){
+  c[x] = -1;
+  for(int y : e[x]){
+    if(c[y]<0)return 0; //有环 
+    else if(!c[y])
+      if(!dfs(y))return 0;
+  }
+  c[x] = 1;
+  tp.push_back(x);
+  return 1;
+}
+bool toposort(){
+  memset(c, 0, sizeof(c));
+  for(int x = 1; x <= n; x++)
+    if(!c[x])
+      if(!dfs(x))return 0;
+  reverse(tp.begin(),tp.end());
+  return 1;
+}
+int main(){
+  cin >> n >> m;
+  for(int i=0; i<m; i++){
+    cin >> a >> b;
+    e[a].push_back(b);
+  }
+  if(!toposort()) puts("-1");
+  else 
+    for(int x:tp)printf("%d ",x);
+  return 0;
+}
+```
+
+### 拓扑排序练习
+
+[P1113 杂务 ](https://www.luogu.com.cn/problem/P1113)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+int n;
+struct edge {
+    vector<int> next;
+    int len;
+} v[N];
+int pre[N] = {0};
+int res[N] = {0};
+
+void tpsort() {
+    queue<int> q;
+    for (int i = 1; i <= n; i++) {
+        if (pre[i] == 0) {
+            res[i] = v[i].len;
+            q.push(i);
+
+        }
+    }
+    int x;
+    int ans = 0;
+    while (q.size()) {
+        x = q.front();
+        q.pop();
+        for (auto i: v[x].next) {
+            res[i] = max(res[x] + v[i].len, res[i]);
+            ans = max(ans, res[i]);
+            if (--pre[i] == 0) {
+                q.push(i);
+            }
+        }
+    }
+    cout << ans << '\n';
+}
+
+void sol() {
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        int x;
+        int f = 0;
+        int idx;
+        while (cin >> x) {
+            if (x == 0) {
+                break;
+            }
+            if (f == 0) {
+                idx = x;
+            } else if (f == 1) {
+                v[idx].len = x;
+            } else if (f >= 2) {
+                v[x].next.push_back(idx);
+                pre[idx]++;
+            }
+            f++;
+        }
+    }
+
+    tpsort();
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+[P1685 游览 ](https://www.luogu.com.cn/problem/P1685)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+int n, m, s, t, t0;
+
+vector<pair<int, int>> p[N];
+const int MOD = 1e4;
+int vis[N] = {0};
+struct edge {
+    ll len;
+    ll times;
+} e[N];
+int d[N] = {0};
+
+void dfs(int x) {
+    for (auto i: p[x]) {
+        e[i.first].len = (e[i.first].len + e[x].len + e[x].times * i.second) % MOD;
+        e[i.first].times = (e[x].times + e[i.first].times) % MOD;
+        if (--d[i.first] == 0) {
+            dfs(i.first);
+        }
+    }
+}
+
+
+void tpsort() {
+    e[s] = {0, 1};
+    dfs(s);
+    ll ans = e[t].len + t0 * (e[t].times - 1);
+    ans %= MOD;
+    cout << ans << '\n';
+}
+
+void sol() {
+    cin >> n >> m >> s >> t >> t0;
+    int x, y, z;
+    for (int i = 1; i <= m; i++) {
+        cin >> x >> y >> z;
+        p[x].push_back({y, z});
+        d[y]++;
+    }
+    tpsort();
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+
+
+## 最短路
+
+### Dijkstra算法（基于贪心思想的单源最短路）
+
+**朴素Dijkstra算法：**
+
+![image-20240831135201961](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240831135201961.png)
+
+![image-20240831135227601](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240831135227601.png)
+
+```cpp
+//Dijkstra 
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <vector>
+#define inf 2147483647
+using namespace std;
+
+int n,m,s,a,b,c;
+const int N=100010;
+struct edge{int v,w;};
+vector<edge> e[N];
+int d[N], vis[N];
+
+void dijkstra(int s){
+  for(int i=0;i<=n;i++)d[i]=inf;
+  d[s]=0;
+  for(int i=1;i<n;i++){//枚举次数
+    int u=0;
+    for(int j=1;j<=n;j++)//枚举点
+      if(!vis[j]&&d[j]<d[u]) u=j;
+    vis[u]=1; //标记u已出圈 
+    for(auto ed:e[u]){//枚举邻边
+      int v=ed.v, w=ed.w;
+      if(d[v]>d[u]+w){
+        d[v]=d[u]+w;
+      } 
+    }
+  } 
+}
+int main(){
+  cin>>n>>m>>s;
+  for(int i=0; i<m; i++){
+    cin>>a>>b>>c;
+    e[a].push_back({b,c});
+  }
+  dijkstra(s);
+  for(int i=1;i<=n;i++)
+    printf("%d ",d[i]);  
+  return 0;
+}
+```
+
+**堆优化：**
+
+![image-20240831135458924](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240831135458924.png)
+
+![image-20240831135510470](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240831135510470.png)
+
+```cpp
+//堆优化Dijkstra 
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+#include <queue>
+using namespace std;
+
+const int N=100010;
+int n,m,s,a,b,c;
+struct edge{int v,w;};
+vector<edge> e[N];
+int d[N],vis[N];
+
+void dijkstra(int s){
+  memset(d,0x3f,sizeof d); d[s]=0; 
+  priority_queue<pair<int,int>> q;
+  q.push({0,s});
+  while(q.size()){
+    auto t=q.top(); q.pop();
+    int u=t.second;
+    if(vis[u])continue; //再出队跳过
+    vis[u]=1; //标记u已出队
+    for(auto ed : e[u]){
+      int v=ed.v, w=ed.w;
+      if(d[v]>d[u]+w){
+        d[v]=d[u]+w;
+        q.push({-d[v],v}); //大根堆
+      }
+    }
+  }
+}
+int main(){
+  cin>>n>>m>>s;
+  for(int i=0; i<m; i++)
+    cin>>a>>b>>c, e[a].push_back({b,c});
+  dijkstra(s);
+  for(int i=1;i<=n;i++) printf("%d ",d[i]); 
+}
+```
+
+![image-20240831135524246](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240831135524246.png)
+
+```cpp
+void dfs_path(int u) {
+    if (u == s) {
+        cout<<u<<' ';
+        return;
+    }
+    dfs_path(pre[u]);
+    cout << u << ' ';
+}
+```
+
+
+
+
+
+### Bellman-Ford 算法（可判负环）
+
+[P3385 【模板】负环 ](https://www.luogu.com.cn/problem/P3385)
+
+![image-20240831164731684](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240831164731684.png)
+
+![image-20240831164811908](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240831164811908.png)
+
+```cpp
+//Ford 判负环 740ms#include <cstring>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+const int inf=0x3f3f3f3f;
+const int N=2010,M=6010;
+int n,m;
+int to[M],ne[M],w[M],h[N],tot;
+int d[N];
+
+void add(int a,int b,int c){
+  to[++tot]=b;w[tot]=c;
+  ne[tot]=h[a];h[a]=tot;
+}
+bool ford(){
+  memset(d,inf,sizeof d); d[1]=0;
+  bool flag; //是否松弛
+  for(int i=1;i<=n;i++){ //跑n轮
+    flag=false;
+    for(int u=1;u<=n;u++){ //n个点
+      if(d[u]==inf)continue;
+      for(int j=h[u];j;j=ne[j]){
+        int v=to[j];
+        if(d[v]>d[u]+w[j]){
+          d[v]=d[u]+w[j];
+          flag=true;
+        }
+      }
+    }
+    if(!flag)break;
+  }
+  return flag; //第n轮=true,有负环
+}
+int main(){
+  int T;
+  scanf("%d",&T);
+  while(T--){
+    tot=0; memset(h,0,sizeof(h));
+    scanf("%d%d",&n,&m);
+    for(int i=1;i<=m;i++){
+      int u,v,w;
+      scanf("%d%d%d",&u,&v,&w);
+      add(u,v,w);
+      if(w>=0)add(v,u,w);;
+    }
+    puts(ford()?"YES":"NO");
+  }
+  return 0;
+}
+```
+
+
+
+**板子****
+
+```cpp
+bool bellman() {
+    memset(d, inf, sizeof d);
+    d[1] = 0;
+    bool flag;
+    for (int i = 1; i <= n; i++) {
+        flag = false;
+        for (int j = 1; j <= n; j++) {
+            if (d[j] == inf) {
+                continue;
+            }
+            for (auto ed: e[j]) {
+                int next = ed.first, w = ed.second;
+                if (d[next] > d[j] + w) {
+                    d[next] = d[j] + w;
+                    flag = true;
+                }
+            }
+        }
+        if (!flag) {
+            break;
+        }
+    }
+    return flag;
+}
+```
+
+
+
+
+
+
+
+![image-20240831194520472](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240831194520472.png)
+
+
+
+- 我们有一个带有边权的有向图，如下：
+  - 节点 A 到节点 B 的边权重为 2。
+  - 节点 B 到节点 C 的边权重为 1。
+  - 节点 C 到节点 A 的边权重为 1。
+
+```scss
+   A --(2)--> B
+   B --(1)--> C
+   C --(1)--> A
+
+
+```
+
+假设我们从节点 AAA 开始计算最短路径。初始时，节点 AAA 的距离为 0，其它节点的距离为正无穷大。队列初始为：AAA。
+
+1. **节点 AAA 出队**：
+   - 检查 AAA 的邻居节点 BBB。
+   - BBB 的当前距离为正无穷大，通过 AAA 的路径可以更新为 0+2=20 + 2 = 20+2=2。
+   - 将 BBB 加入队列，此时队列为：BBB。
+2. **节点 BBB 出队**：
+   - 检查 BBB 的邻居节点 CCC。
+   - CCC 的当前距离为正无穷大，通过 BBB 的路径可以更新为 2+1=32 + 1 = 32+1=3。
+   - 将 CCC 加入队列，此时队列为：CCC。
+3. **节点 CCC 出队**：
+   - 检查 CCC 的邻居节点 AAA。
+   - AAA 的当前距离为 0，通过 CCC 的路径 3+1=43 + 1 = 43+1=4，显然这条路径比之前的距离更长，因此不更新 AAA 的距离。
+
+
+
+**如果不保证“不在队列中的元素才能入队”会发生什么？**
+
+假设在上述过程中，我们不检查队列中是否已经有元素，当遇到更新的节点时就立即将它再次入队：
+
+1. **节点 AAA 出队**时更新了 BBB 的距离，BBB 被加入队列。
+2. **节点 BBB 出队**时更新了 CCC 的距离，CCC 被加入队列。
+3. **节点 CCC 出队**时虽然没有更新 AAA 的距离，但我们可能没有检查是否需要将 AAA 重新入队。这样，虽然 AAA 的距离并没有变，但它仍然会被加入队列。
+4. 由于节点 AAA 再次入队，它会触发对邻居节点 BBB 和 CCC 的重新处理。虽然 BBB 和 CCC 的距离也不会更新，但它们会继续不断入队出队，陷入一个无意义的循环。
+
+**保证“不在队列中才能入队”的好处**
+
+通过保证一个节点只有在不在队列中的时候才能入队，SPFA算法避免了上述的循环问题。队列中的每个节点仅在距离更新时才会被处理一次，避免重复计算和死循环，提升了算法的效率。
+
+在这个例子中，如果我们允许重复入队，队列中将会不断出现 AAA、BBB、CCC 的反复循环，导致算法效率急剧下降，甚至可能陷入死循环。而通过检查是否已经在队列中，我们可以确保一个节点在被处理前不会被多次入队，从而保证了算法的正确性和高效性。
+
+**总结**
+
+保证节点不在队列中才能入队的主要原因是避免重复处理相同的节点。这样可以防止冗余计算，节省时间，并避免出现循环入队的情况，提高SPFA算法的整体效率。
+
+
+
+**为什么识别器cnt[ed.next] >= n是根据节点数n来界定而不是m？**
+
+在SPFA算法中，`cnt[ed.next] >= n` 被用作检测负环的条件，而这个判断是基于节点数 nnn（图中节点的数量），而不是边数 mmm。这是因为负环的检测本质上与节点的遍历次数相关，而不是边的数量。下面是详细的解释。
+
+  1. **负环的特性**：
+
+- **负环**是指在图中某个环的所有边的权重和为负数。沿着这个环不断循环会使路径长度无限减少。
+- 如果一个图中有 nnn 个节点，那么从某个节点出发，通过最多 n−1n-1n−1 次边的松弛操作应该就可以得到该节点的最短路径。因为从一个节点出发，最短路径最多只能经过 n−1n-1n−1 个不同的节点。
+- 如果在 nnn 次松弛之后，某个节点的最短路径仍然在不断被更新，这意味着这个节点一定处在一个负环中，因为根据最短路径的理论，松弛操作不应该再继续更新。
+
+2. **为什么是基于节点数 nnn**：
+
+- **松弛操作的原理**：最短路径算法通过松弛操作更新路径长度。如果没有负环，任意节点的最短路径最多经过 n−1n-1n−1 条边即可确定，不会再被更新。因此，如果一个节点的松弛次数超过了 n−1n-1n−1，意味着这个节点被包含在了某个环中，并且该环是负权环。
+- **直观解释**：每当某个节点的松弛操作超过了 nnn 次，这意味着它的最短路径被更新了超过它可能经过的所有节点的数量（n−1n-1n−1 次），这只能发生在负环存在的情况下，路径在负环中不断循环，从而无限减少。
+
+3. **为什么不是基于边数 mmm**：
+
+- **边数与负环的关系**：负环的检测与边数无直接关系。虽然边数决定了图的稠密程度，但负环的存在与否仅取决于节点与边之间的连接关系（特别是环的存在及其总权重）。因此，单纯通过边数无法判断是否存在负环。
+- 在 SPFA 算法中，边数 mmm 只影响松弛操作的次数总量，而不会影响具体的节点被松弛多少次。即使边数较多，但如果路径的更新次数不超过节点数，那么不会出现负环。
+
+4. **算法的直观理解**：
+
+- **Bellman-Ford 算法的类比**：在 Bellman-Ford 算法中，最短路径的更新最多需要 n−1n-1n−1 次松弛操作（因为最短路径最多只能经过 n−1n-1n−1 条边）。SPFA 是 Bellman-Ford 的一种优化变种，直接将这种逻辑应用于节点的松弛次数判断。如果某个节点的松弛次数超过 nnn，意味着发生了不合理的路径更新（负环的存在）。
+- **循环和负环**：如果某个节点不断被松弛超过 nnn 次，则表明该节点处于一个循环路径中，而这个循环必然是一个负环，否则路径不会继续更新。因此，算法使用节点数 nnn 作为判断条件。
+
+** 总结：**
+
+`cnt[ed.next] >= n` 的判定基于最短路径算法的理论，即一个节点的最短路径最多经过 n−1n-1n−1 条边（或 nnn 次松弛）。如果某个节点的松弛次数超过了 nnn，这意味着存在负权环，使得路径无限缩短。因此，该判定条件使用节点数 nnn 而不是边数 mmm，因为负环与经过的节点数直接相关，而与边数无关。
+
+
+
+ **总结为什么是节点数 nnn 而不是边数 mmm：**
+
+1. **路径更新次数与节点数相关**：最短路径算法的一个基本事实是，如果图中没有负环，从源点到某个节点的最短路径最多只能经过 n−1n-1n−1 条边。超过这个次数还在更新，说明存在负环。
+2. **超过 n−1n-1n−1 次更新意味着负环**：在没有负环的情况下，每个节点最多只会被松弛 n−1n-1n−1 次。在以上示例中，当你看到某个节点被松弛超过 4 次（节点数 nnn），就说明它被包含在了一个负权环中，而在这个环中循环会导致路径长度越来越短。
+3. **边数无法直接反映负环**：虽然边的数量 mmm 影响了整个图的复杂度，但它并不能直接决定是否存在负环。一个图中可能有很多边，但只要没有负环，节点的松弛次数就不会超过 n−1n-1n−1 次。因此，基于边数 mmm 来判断负环是不合理的。
+4. **与节点数相关的环检测**：检测负环实际上是在检测路径是否“回到了起点”（形成环），而这一过程本质上与节点数有关。每个节点能经过的最长简单路径长度是 n−1n-1n−1 条边（在无负环的情况下）。一旦超过这个次数，说明已经形成了一个环，且这个环为负权环。
+
+
+
+**板子：（自写）**
+
+```cpp
+bool SPFA() {
+    queue<int> q;
+    q.push(1);
+    while (!q.empty()) {
+        int x = q.front();
+        q.pop();
+        vis[x] = 0;
+
+        for (auto &ed: e[x]) {
+            if (d[ed.next] > d[x] + ed.w) {
+                d[ed.next] = d[x] + ed.w;
+                cnt[ed.next] = cnt[x] + 1;
+                if (cnt[ed.next] >= n) {
+                    return true;
+                }
+                if (!vis[ed.next]) {
+                    q.push(ed.next);
+                    vis[ed.next] = 1;
+                }
+            }
+        }
+    }
+    return false;
+}
+```
+
+**董晓：**
+
+```cpp
+//BFS_spfa 判负环 530ms
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+using namespace std;
+
+const int inf=0x3f3f3f3f;
+const int N=2010,M=6010;
+int n,m;
+int to[M],ne[M],w[M],h[N],tot;
+int d[N],cnt[N],vis[N];
+
+void add(int a,int b,int c){
+  to[++tot]=b;w[tot]=c;
+  ne[tot]=h[a];h[a]=tot;
+}
+bool spfa(){ //判负环
+  memset(d,0x3f,sizeof d); 
+  memset(vis,0,sizeof vis);
+  memset(cnt,0,sizeof cnt);
+  queue<int>q; 
+  q.push(1); vis[1]=1; d[1]=0; 
+  while(q.size()){
+    int u=q.front();q.pop();vis[u]=0;
+    for(int i=h[u];i;i=ne[i]){
+      int v=to[i];
+      if(d[v]>d[u]+w[i]){
+        d[v]=d[u]+w[i];
+        cnt[v]=cnt[u]+1; 
+        if(cnt[v]>=n)return 1;//判边数
+        if(!vis[v])q.push(v),vis[v]=1;
+      }
+    }
+  }
+  return 0;
+}
+int main(){
+  int T; scanf("%d",&T);
+  while(T--){
+    tot=0; memset(h,0,sizeof(h));
+    scanf("%d%d",&n,&m);
+    for(int i=1;i<=m;i++){
+      int u,v,w;
+      scanf("%d%d%d",&u,&v,&w);
+      add(u,v,w);
+      if(w>=0)add(v,u,w);;
+    }
+    puts(spfa()?"YES":"NO");
+  }
+  return 0;
+}
+```
+
+```cpp
+//BFS_spfa 判负环 690ms
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+using namespace std;
+
+const int inf=0x3f3f3f3f;
+const int N=2010,M=6010;
+int n,m;
+int to[M],ne[M],w[M],h[N],tot;
+int d[N],cnt[N],vis[N];
+
+void add(int a,int b,int c){
+  to[++tot]=b;w[tot]=c;
+  ne[tot]=h[a];h[a]=tot;
+}
+bool spfa(){ //判负环
+  memset(d,0x3f,sizeof d); 
+  memset(vis,0,sizeof vis);
+  memset(cnt,0,sizeof cnt);
+  queue<int>q;
+  q.push(1); vis[1]=1; d[1]=0; 
+  while(q.size()){
+    int u=q.front();q.pop();vis[u]=0;
+    for(int i=h[u];i;i=ne[i]){
+      int v=to[i];
+      if(d[v]>d[u]+w[i]){
+        d[v]=d[u]+w[i];
+        if(++cnt[v]>n)return 1;//判点数
+        if(!vis[v])q.push(v),vis[v]=1;
+      }
+    }
+  }
+  return 0;
+}
+int main(){
+  int T; scanf("%d",&T);
+  while(T--){
+    tot=0; memset(h,0,sizeof(h));
+    scanf("%d%d",&n,&m);
+    for(int i=1;i<=m;i++){
+      int u,v,w;
+      scanf("%d%d%d",&u,&v,&w);
+      add(u,v,w);
+      if(w>=0)add(v,u,w);;
+    }
+    puts(spfa()?"YES":"NO");
+  }
+  return 0;
+}
+```
+
+```cpp
+//DFS_spfa 判负环 会卡点 #9
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int inf=0x3f3f3f3f;
+const int N=2010,M=6010;
+int n,m;
+int to[M],ne[M],w[M],h[N],tot;
+int d[N],vis[N];
+
+void add(int a,int b,int c){
+  to[++tot]=b;w[tot]=c;
+  ne[tot]=h[a];h[a]=tot;
+}
+bool spfa(int u){ //判负环
+  vis[u]=1;
+  for(int i=h[u];i;i=ne[i]){
+    int v=to[i];
+    if(d[v]>d[u]+w[i]){
+      d[v]=d[u]+w[i];
+      if(vis[v]||spfa(v))return 1;
+    }
+  }
+  vis[u]=0;
+  return 0;
+}
+int main(){
+  int T; scanf("%d",&T);
+  while(T--){
+    tot=0; memset(h,0,sizeof(h));
+    scanf("%d%d",&n,&m);
+    for(int i=1;i<=m;i++){
+      int u,v,w;
+      scanf("%d%d%d",&u,&v,&w);
+      add(u,v,w);
+      if(w>=0)add(v,u,w);;
+    }
+    memset(d,0x3f,sizeof d);d[1]=0;
+    memset(vis,0,sizeof vis);
+    puts(spfa(1)?"YES":"NO");
+  }
+  return 0;
+}
+```
+
+
+
+
+
+![image-20240831194537222](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240831194537222.png)
+
+![image-20240831194558332](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240831194558332.png)
+
+
+
+### Floyed(基于动态规划的全源最短路算法)
+
+![image-20240901102048355](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240901102048355.png)![image-20240901102102863](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240901102102863.png)
+
+![image-20240901102133481](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240901102133481.png)
+
+![image-20240901102151021](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240901102151021.png)
+
+![image-20240901102227510](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240901102227510.png)
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+const int N = 210, M = 20010;
+int n, m, a, b, c;
+int d[N][N];
+
+void floyd() {
+    for (int k = 1; k <= n; k++)
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= n; j++)
+                d[i][j] = min(d[i][j], d[i][k] + d[k][j]);
+}
+
+int main() {
+    cin >> n >> m;
+    memset(d, 0x3f, sizeof d);
+    for (int i = 1; i <= n; i++)d[i][i] = 0;
+    for (int i = 0; i < m; i++) {
+        cin >> a >> b >> c;
+        d[a][b] = min(d[a][b], c); //重边
+    }
+    floyd();
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++)
+            printf("%d ", d[i][j]);
+        puts("");
+    }
+    return 0;
+}
+```
+
+
+
+### Johnson算法
+
+![image-20240901111829320](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240901111829320.png)
+
+![image-20240901113207192](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240901113207192.png)
+
+![image-20240901113308878](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240901113308878.png)
+
+
+
+**董晓板子：**
+
+```cpp
+#include<algorithm>
+#include<cstring>
+#include<iostream>
+#include<queue>
+
+#define N 30010
+#define INF 1000000000
+using namespace std;
+
+int n, m, a, b, c;
+struct edge {
+    int v, w;
+};
+vector<edge> e[N];
+int vis[N], cnt[N];
+long long h[N], d[N];
+
+void spfa() {
+    queue<int> q;
+    memset(h, 63, sizeof h);
+    memset(vis, false, sizeof vis);
+    h[0] = 0, vis[0] = 1;
+    q.push(0);
+    while (q.size()) {
+        int u = q.front();
+        q.pop();
+        vis[u] = 0;
+        for (auto ed: e[u]) {
+            int v = ed.v, w = ed.w;
+            if (h[v] > h[u] + w) {
+                h[v] = h[u] + w;
+                cnt[v] = cnt[u] + 1;
+                if (cnt[v] >= n) {
+                    printf("-1\n");
+                    exit(0);
+                }
+                if (!vis[v])q.push(v), vis[v] = 1;
+            }
+        }
+    }
+}
+
+void dijkstra(int s) {
+    priority_queue<pair<long long, int>> q;
+    for (int i = 1; i <= n; i++)d[i] = INF;
+    memset(vis, false, sizeof vis);
+    d[s] = 0;
+    q.push({0, s});
+    while (q.size()) {
+        int u = q.top().second;
+        q.pop();
+        if (vis[u])continue;
+        vis[u] = 1;
+        for (auto ed: e[u]) {
+            int v = ed.v, w = ed.w;
+            if (d[v] > d[u] + w) {
+                d[v] = d[u] + w;
+                if (!vis[v]) q.push({-d[v], v});
+            }
+        }
+    }
+}
+
+int main() {
+    cin >> n >> m;
+    for (int i = 0; i < m; i++)
+        cin >> a >> b >> c, e[a].push_back({b, c});
+    for (int i = 1; i <= n; i++)
+        e[0].push_back({i, 0});//加虚拟边
+
+    spfa();
+    for (int u = 1; u <= n; u++)
+        for (auto &ed: e[u])
+            ed.w += h[u] - h[ed.v];//构造新边
+    for (int i = 1; i <= n; i++) {
+        dijkstra(i);
+        long long ans = 0;
+        for (int j = 1; j <= n; j++) {
+            if (d[j] == INF) ans += (long long) j * INF;
+            else ans += (long long) j * (d[j] + h[j] - h[i]);
+        }
+        printf("%lld\n", ans);
+    }
+    return 0;
+}
+```
+
+**我的板子**
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 30010;
+const int inf = 1e9;
+using namespace std;
+int n, m, a, b, c;
+struct edge {
+    int v, w;
+};
+vector<edge> e[N];
+int vis[N], cnt[N];
+ll d[N], h[N];
+
+bool spfa() { //判负环
+    memset(h, 0x3f, sizeof h);
+    memset(vis, 0, sizeof vis);
+    memset(cnt, 0, sizeof cnt);
+    queue<int> q;
+    q.push(0);
+    vis[0] = 1;
+    h[0] = 0;
+    while (q.size()) {
+        int u = q.front();
+        q.pop();
+        vis[u] = 0;
+        for (auto ed: e[u]) {
+            int v = ed.v, w = ed.w;
+            if (h[v] > h[u] + w) {
+                h[v] = h[u] + w;
+                cnt[v] = cnt[u] + 1;
+                if(cnt[v]>n){
+                    printf("-1\n");exit(0);
+                }
+                if (!vis[v]) {
+                    q.push(v);
+                    vis[v] = 1;
+                }
+            }
+        }
+
+    }
+    return 0;
+}
+
+void dijkstra(int s) {
+    memset(vis, 0, sizeof vis);
+    for (int i = 1; i <= n; i++)d[i] = inf;
+    priority_queue<pair<ll, int>> q;
+    q.push({0, s});
+    d[s] = 0;
+    while (!q.empty()) {
+        int u = q.top().second;
+        q.pop();
+        if (vis[u]) {
+            continue;
+        }
+        vis[u] = 1;
+        for (auto ed: e[u]) {
+            int v = ed.v, w = ed.w;
+            if (d[v] > d[u] + w) {
+                d[v] = d[u] + w;
+                if (!vis[v]) {
+                    q.push({-d[v], v});
+                }
+            }
+        }
+    }
+
+}
+
+
+void john() {
+    for (int i = 1; i <= n; i++) {
+        e[0].push_back({i, 0});
+    }
+    spfa();
+    for (int i = 1; i <= n; i++) {
+        for (auto &ed: e[i]) {
+            ed.w += h[i] - h[ed.v];
+        }
+    }
+    for (int i = 1; i <= n; i++) {
+        dijkstra(i);
+        ll ans = 0;
+        for (int j = 1; j <= n; j++) {
+            if (d[j] == inf) {
+                ans += (ll) inf * j;
+            } else {
+                ans += (ll) j * (d[j] + h[j] - h[i]);
+            }
+        }
+        cout << ans << '\n';
+    }
+}
+
+void sol() {
+    cin >> n >> m;
+    for (int i = 0; i < m; i++) {
+        cin >> a >> b >> c;
+        e[a].push_back({b, c});
+    }
+    john();
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+
+
+## 最小环
+
+![image-20240902082603378](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240902082603378.png)![image-20240902082756375](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240902082756375.png)
+
+![image-20240902082849793](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240902082849793.png)
+
+![image-20240902082903827](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240902082903827.png)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 110;
+using namespace std;
+int n, m;
+ll d[N][N] = {0}, w[N][N];
+ll ans = 1e8;
+
+void floyd_min() {
+    for (int k = 1; k <= n; k++) {
+        for (int i = 1; i < k; i++) {
+            for (int j = i + 1; j < k; j++) {
+                ans = min(ans, d[i][j] + w[j][k] + w[k][i]);
+                //这里求ans用到的最短路还没经过K点，即i~j中不包含k点，所以可以用k点作为端点来判环
+                //后续在计算k在i~j中的多源最短路，此时为正常流程。若跑完floyd后ans未更新
+                //则未有环。
+            }
+        }
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= n; j++) {
+                d[i][j] = min(d[i][j], d[i][k] + d[k][j]);
+            }
+        }
+    }
+}
+
+void sol() {
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            if (i != j) {
+                w[i][j] = 1e8;
+            }
+        }
+    }
+
+    int x, y, z;
+    for (int i = 0; i < m; i++) {
+        cin >> x >> y >> z;
+        w[x][y] = z;
+        w[y][x] = z;
+    }
+    memcpy(d, w, sizeof d);
+    floyd_min();
+    if (ans == 1e8) {
+        cout << "No solution." << "\n";
+    } else {
+        cout << ans << '\n';
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+## 最小生成树
+
+### Prim算法
+
+![image-20240902112419842](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240902112419842.png)
+
+
+
+![image-20240902200157311](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240902200157311.png)
+
+
+
+**董晓板子：**
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <vector>
+#define inf 1e9
+using namespace std;
+
+int n,m,a,b,c,ans,cnt;
+const int N=5010;
+struct edge{int v,w;};
+vector<edge> e[N];
+int d[N], vis[N];
+
+bool prim(int s){
+  for(int i=0;i<=n;i++)d[i]=inf;
+  d[s]=0;
+  for(int i=1;i<=n;i++){
+    int u=0;
+    for(int j=1;j<=n;j++)
+      if(!vis[j]&&d[j]<d[u]) u=j;
+    vis[u]=1; //标记u已出圈
+    ans+=d[u];
+    if(d[u]!=inf) cnt++;
+    for(auto ed : e[u]){
+      int v=ed.v, w=ed.w;
+      if(d[v]>w) d[v]=w;
+    }
+  }
+  return cnt==n;
+}
+int main(){
+  cin>>n>>m;
+  for(int i=0; i<m; i++){
+    cin>>a>>b>>c;
+    e[a].push_back({b,c});
+    e[b].push_back({a,c});
+  }
+  if(!prim(1))puts("orz");
+  else printf("%d\n",ans); 
+  return 0;
+}
+
+///////////////////Heap-Prim 
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+#include <queue>
+#define inf 1e9
+using namespace std;
+
+const int N=5010;
+int n,m,a,b,c,ans,cnt;
+struct edge{int v,w;};
+vector<edge> e[N];
+int d[N], vis[N];
+priority_queue<pair<int,int>> q;
+        
+bool prim(int s){
+  for(int i=0;i<=n;i++) d[i]=inf;
+  d[s]=0; q.push({0,s});
+  while(q.size()){
+    int u=q.top().second; q.pop();
+    if(vis[u])continue;//再出队跳过
+    vis[u]=1;//标记u已出队
+    ans+=d[u]; cnt++;
+    for(auto ed : e[u]){
+      int v=ed.v, w=ed.w;
+      if(d[v]>w){
+        d[v]=w;
+        q.push({-d[v],v});//大根堆
+      }
+    }
+  }
+  return cnt==n;
+}
+int main(){
+  cin>>n>>m;
+  for(int i=0; i<m; i++){
+    cin>>a>>b>>c;
+    e[a].push_back({b,c});
+    e[b].push_back({a,c});
+  }
+  if(!prim(1))puts("orz");
+  else printf("%d\n",ans); 
+  return 0;
+}
+```
+
+### Kruskal算法
+
+![image-20240902201421941](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240902201421941.png)
+
+![image-20240902201435113](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240902201435113.png)
+
+
+
+## 最近公共祖先（LCA）
+
+### 倍增算法
+
+
+
+![img](https://img2023.cnblogs.com/blog/1973969/202312/1973969-20231205222415741-1871701990.png)
+
+
+
+![img](https://img2023.cnblogs.com/blog/1973969/202312/1973969-20231205222415691-1176795922.png)
+
+
+
+**self**
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 5e5 + 10;
+using namespace std;
+int dep[N] = {0}, fa[N][22] = {0};
+vector<int> e[N];
+
+void dfs(int u, int father) {
+    dep[u] = dep[father] + 1;
+    fa[u][0] = father;
+    for (int i = 1; i <= 20; i++) {
+        fa[u][i] = fa[fa[u][i - 1]][i - 1];
+    }
+    for (int v: e[u]) {
+        if (v != father) {
+            dfs(v, u);
+        }
+    }
+}
+
+int lca(int u, int v) {
+    if (dep[u] < dep[v]) {
+        swap(u, v);
+    }
+    for (int i = 20; i >= 0; i--) {
+        if (dep[fa[u][i]] >= dep[v]) {
+            u = fa[u][i];
+        }
+    }
+    if (u == v) {
+        return u;
+    }
+    for (int i = 20; i >= 0; i--) {
+        if (fa[u][i] != fa[v][i]) {
+            u = fa[u][i];
+            v = fa[v][i];
+        }
+    }
+    return fa[u][0];
+}
+
+void sol() {
+    int n, m, s;
+    cin >> n >> m >> s;
+    for (int i = 1; i < n; i++) {
+        int x, y;
+        cin >> x >> y;
+        e[x].push_back(y);
+        e[y].push_back(x);
+    }
+    dfs(s, 0);
+    for (int i = 0; i < m; i++) {
+        int x, y;
+        cin >> x >> y;
+        cout << lca(x, y) << "\n";
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+**d**
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+
+const int N = 5e5 + 10, M = 2 * N;
+int n, m, s, a, b;
+int dep[N], fa[N][22];
+int h[N], to[M], ne[M], tot;
+
+void add(int a, int b) {
+    to[++tot] = b, ne[tot] = h[a], h[a] = tot;
+}
+
+void dfs(int x, int f) {
+    dep[x] = dep[f] + 1;
+    fa[x][0] = f;
+    for (int i = 0; i <= 20; i++)
+        fa[x][i + 1] = fa[fa[x][i]][i];
+    for (int i = h[x]; i; i = ne[i])
+        if (to[i] != f) dfs(to[i], x);
+}
+
+int lca(int x, int y) {
+    if (dep[x] < dep[y]) swap(x, y);
+    for (int i = 20; ~i; i--)
+        if (dep[fa[x][i]] >= dep[y]) x = fa[x][i];
+    if (x == y) return y;
+
+    for (int i = 20; ~i; i--)
+        if (fa[x][i] != fa[y][i]) x = fa[x][i], y = fa[y][i];
+    return fa[x][0];
+}
+
+int main() {
+    scanf("%d%d%d", &n, &m, &s);
+    for (int i = 1; i < n; i++) {
+        scanf("%d%d", &a, &b);
+        add(a, b);
+        add(b, a);
+    }
+    dfs(s, 0);
+    while (m--) {
+        scanf("%d%d", &a, &b);
+        printf("%d\n", lca(a, b));
+    }
+    return 0;
+}
+```
+
+
+
+### Tarjan
+
+![img](https://img2023.cnblogs.com/blog/1973969/202312/1973969-20231205222827155-672357119.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202312/1973969-20231205222827047-1517450763.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202312/1973969-20231205222826857-1656458506.png)
+
+**d**
+
+```cpp
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <vector>
+
+using namespace std;
+
+const int N = 500005, M = 2 * N;
+int n, m, s, a, b;
+vector<int> e[N];
+vector<pair<int, int>> query[N];
+int fa[N], vis[N], ans[M];
+
+int find(int x) {
+    if (x == fa[x]) return x;
+    return fa[x] = find(fa[x]);
+}
+
+void tarjan(int x) {
+    vis[x] = true;//标记x已访问
+    for (auto y: e[x]) {
+        if (!vis[y]) {
+            tarjan(y);
+            fa[y] = x;//回到x时指向x
+        }
+    }
+    //离开x时找LCA
+    for (auto q: query[x]) {
+        int y = q.first, i = q.second;
+        if (vis[y])ans[i] = find(y);
+    }
+}
+
+int main() {
+    scanf("%d%d%d", &n, &m, &s);
+    for (int i = 1; i < n; i++) {
+        scanf("%d%d", &a, &b);
+        e[a].push_back(b);
+        e[b].push_back(a);
+    }
+    for (int i = 1; i <= m; i++) {
+        scanf("%d%d", &a, &b);
+        query[a].push_back({b, i});
+        query[b].push_back({a, i});
+    }
+
+    for (int i = 1; i <= N; i++)fa[i] = i;
+    tarjan(s);
+    for (int i = 1; i <= m; i++)
+        printf("%d\n", ans[i]);
+    return 0;
+}
+```
+
+
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 5e5 + 10;
+using namespace std;
+vector<int> e[N];
+vector<pair<int, int>> query[N];
+int ans[N], vis[N], fa[N];
+
+int find_fa(int s) {
+    if (fa[s] == s) {
+        return s;
+    }
+    return fa[s] = find_fa(fa[s]);
+}
+
+void tarjan_lca(int u) {
+    vis[u] = 1;
+    for (int v: e[u]) {
+        if (!vis[v]) {
+            tarjan_lca(v);
+            fa[v] = u;
+        }
+    }
+    for (auto ed: query[u]) {
+        int v = ed.first, t = ed.second;
+        if (vis[v]) {
+            ans[t] = find_fa(v);
+        }
+    }
+}
+
+void sol() {
+    int n, m, s;
+    cin >> n >> m >> s;
+    fill(vis, vis + n + 1, 0);
+    fill(ans, ans + m + 1, 0);
+    for (int i = 1; i <= n; i++) {
+        fa[i] = i;
+    }
+    for (int i = 1; i < n; i++) {
+        int x, y;
+        cin >> x >> y;
+        e[x].push_back(y);
+        e[y].push_back(x);
+    }
+    for (int i = 1; i <= m; i++) {
+        int x, y;
+        cin >> x >> y;
+        query[x].push_back({y, i});
+        query[y].push_back({x, i});
+    }
+    tarjan_lca(s);
+    for (int i = 1; i <= m; i++) {
+        cout << ans[i] << '\n';
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    sol();
+}
+```
+
+
+
+### 树链剖分
+
+![img](https://img2023.cnblogs.com/blog/1973969/202312/1973969-20231205223003215-890766764.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202312/1973969-20231205223002706-364462478.png)
+
+![image-20240904153140924](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240904153140924.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 数论和线性代数
+
+## 快速幂
+
+### 一般快速幂
+
+**板子**
+
+```cpp
+ll quick_pow(ll a, ll b, ll m) {
+    ll ans = 1;
+    a %= m;
+    while (b) {
+        if (b & 1) {
+            ans = (ans * a) % m;
+        }
+        a = (a * a) % m;
+        b >>= 1;
+    }
+    return ans;
+}
+```
+
+[P1226 【模板】快速幂](https://www.luogu.com.cn/problem/P1226)
+
+```cpp
+#include<bits/stdc++.h>
+
+typedef unsigned long long ull;
+typedef long long ll;
+const int P = 131;//用于字符串哈希
+const int N = 1e5;
+using namespace std;
+
+ll quick_pow(ll a, ll b, ll m) {
+    ll ans = 1;
+    a %= m;
+    while (b) {
+        if (b & 1) {
+            ans = (ans * a) % m;
+        }
+        a = (a * a) % m;
+        b >>= 1;
+    }
+    return ans;
+}
+
+void sol() {
+    ll a, b, q;
+    cin >> a >> b >> q;
+    printf("%lld^%lld mod %lld=%lld", a, b, q, quick_pow(a, b, q));
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    sol();
+}
+```
+
+### 高精度快速幂
+
+[P1045 [NOIP2003 普及组] 麦森数](https://www.luogu.com.cn/problem/P1045)
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <vector>
+#include <cmath>
+using namespace std;
+
+const int N=500;
+typedef vector<int> VI;
+VI a(N),res(N);
+int p;
+
+VI mul(VI &a, VI &b){//高精度
+  VI t(N*2);
+  for(int i=0; i<N; i++)
+    for(int j=0; j<N; j++){
+      t[i+j] += a[i]*b[j];
+      t[i+j+1] += t[i+j]/10;
+      t[i+j] %= 10;    
+    }
+  return t;
+}
+void quickpow(int p){//快速幂
+  res[0]=1, a[0]=2;
+  while(p){
+    if(p & 1) res = mul(res,a);
+    a = mul(a,a);
+    p >>= 1;
+  }
+  res[0]--; //个位修正
+}
+int main(){
+  cin >> p;
+  printf("%d\n",int(p*log10(2))+1);
+  quickpow(p);
+  for(int i=0, k=499; i<10; i++){
+    for(int j=0; j<50; j++, k--)
+      printf("%d",res[k]);
+    puts("");
+  }
+  return 0;
+}
+```
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <vector>
+#include <cmath>
+using namespace std;
+
+const int N=500;
+int a[N*2],res[N*2],t[N*2];
+int p;
+
+void mul(int*a, int*b, int*c){//高精度
+  memset(t,0,sizeof(t));
+  for(int i=0; i<N; i++)
+    for(int j=0; j<N; j++){
+      t[i+j] += a[i]*b[j];
+      t[i+j+1] += t[i+j]/10;
+      t[i+j] %= 10;    
+    }
+  memcpy(c,t,sizeof(t));
+}
+void quickpow(int p){//快速幂
+  res[0]=1, a[0]=2;
+  while(p){
+    if(p & 1) mul(res,a,res);
+    mul(a,a,a);
+    p >>= 1;
+  }
+  res[0]--; //个位修正
+}
+int main(){
+  cin >> p;
+  printf("%d\n",int(p*log10(2))+1);
+  quickpow(p);
+  for(int i=0, k=499; i<10; i++){
+    for(int j=0; j<50; j++, k--)
+      printf("%d",res[k]);
+    puts("");
+  }
+  return 0;
+}
+```
+
+### 矩阵快速幂
+
+[P3390 【模板】矩阵快速幂 ](https://www.luogu.com.cn/problem/P3390)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202311/1973969-20231128221101557-1164393893.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202311/1973969-20231128221101738-1126499353.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202311/1973969-20231128221101760-640077602.png)
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+typedef long long LL;
+const int mod=1000000007;
+struct matrix{
+    LL c[101][101];
+    matrix(){memset(c, 0, sizeof c);}
+} A, res;
+LL n, k;
+
+matrix operator*(matrix &x, matrix &y){ //矩阵乘法
+    matrix t; //临时矩阵
+    for(int i=1; i<=n; i++)
+      for(int j=1; j<=n; j++)
+        for(int k=1; k<=n; k++)    
+          t.c[i][j]=(t.c[i][j]+x.c[i][k]*y.c[k][j])%mod;
+    return t;
+}
+void quickpow(LL k){ //快速幂
+    for(int i=1; i<=n; i++) res.c[i][i]=1; //单位矩阵
+    while(k){
+        if(k & 1) res = res*A;
+        A = A*A;
+        k >>= 1;
+    }  
+}
+int main(){
+    scanf("%d%lld",&n,&k);
+    for(int i=1; i<=n; i++)
+        for(int j=1; j<=n; j++)
+            scanf("%d",&A.c[i][j]);
+    quickpow(k);        
+    for(int i=1; i<=n; i++){
+        for(int j=1; j<=n; j++)
+            printf("%d ",res.c[i][j]);
+        puts("");
+    }
+    return 0;
+}
+```
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+typedef long long LL;
+const int mod=1000000007;
+struct matrix{
+    LL c[101][101];
+} A, res;
+LL n, k;
+
+matrix mul(matrix &x, matrix &y){ //矩阵乘法
+    matrix t; //临时矩阵
+    memset(t.c, 0, sizeof t.c);
+    for(int i=1; i<=n; i++)
+      for(int j=1; j<=n; j++)
+        for(int k=1; k<=n; k++)    
+          t.c[i][j]=(t.c[i][j]+x.c[i][k]*y.c[k][j])%mod;
+    return t;
+}
+void quickpow(LL k){ //快速幂
+    for(int i=1; i<=n; i++) res.c[i][i]=1; //单位矩阵
+    while(k){
+        if(k & 1) res = mul(res,A);
+        A = mul(A,A);
+        k >>= 1;
+    }  
+}
+int main(){
+    scanf("%d%lld",&n,&k);
+    for(int i=1; i<=n; i++)
+        for(int j=1; j<=n; j++)
+            scanf("%d",&A.c[i][j]);
+    quickpow(k);        
+    for(int i=1; i<=n; i++){
+        for(int j=1; j<=n; j++)
+            printf("%d ",res.c[i][j]);
+        puts("");
+    }
+    return 0;
+}
+```
+
+
+
+
+
+# 基础算法
+
+## 高精度算法
+
+### 加法
+
+[P1601 A+B Problem（高精）](https://www.luogu.com.cn/problem/P1601)
+
+![image-20240829165704628](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829165704628.png)
+
+![image-20240829170100162](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829170100162.png)
+
+![image-20240829172848363](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829172848363.png)
+
+**板子**
+
+```cpp
+#include <iostream>
+using namespace std;
+
+const int N=505;
+int a[N],b[N],c[N];
+int la,lb,lc;
+
+void add_op(int a[],int b[],int c[]){ //a+b=c
+    for(int i=1; i<=lc; i++){
+        c[i]+=a[i]+b[i]; //求和
+        c[i+1]+=c[i]/10; //进位
+        c[i]%=10;        //存余
+    }
+    if(c[lc+1]) lc++;  //最高位
+}
+
+void add_init(string sa, string sb){
+    la=sa.size(),lb=sb.size(),lc=max(la,lb);
+    for(int i=1; i<=la; i++) a[i]=sa[la-i]-'0';
+    for(int i=1; i<=lb; i++) b[i]=sb[lb-i]-'0';
+    add_op(a,b,c);
+}
+
+int main(){
+    string sa,sb; cin>>sa>>sb;
+    add_init(sa,sb);
+    for(int i=lc; i; i--){
+        cout<<c[i];
+    };
+    return 0;
+}
+```
+
+
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+typedef vector<int> VI;
+VI a, b, c;
+int la,lb,lc;
+
+void add(VI &a,VI &b,VI &c){
+  int t=0;
+  for(int i=0; i<lc; i++){
+    if(i<la) t+=a[i];
+    if(i<lb) t+=b[i];
+    c.push_back(t%10); //存余
+    t/=10;             //进位
+  }
+  if(t) c.push_back(t);
+}
+int main(){
+  string sa,sb; cin>>sa>>sb;
+  la=sa.size(); lb=sb.size(); lc=max(la,lb);
+  for(int i=la-1;~i;i--) a.push_back(sa[i]-'0');
+  for(int i=lb-1;~i;i--) b.push_back(sb[i]-'0');
+  add(a,b,c);
+  for(int i=c.size()-1;~i;i--) printf("%d", c[i]);
+  return 0;
+}
+```
+
+
+
+### 减法
+
+![image-20240829174314103](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829174314103.png)
+
+![image-20240829174524596](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829174524596.png)
+
+[P2142 高精度减法](https://www.luogu.com.cn/problem/P2142)
+
+```cpp
+#include <iostream>
+
+using namespace std;
+
+const int N = 20000;
+int a[N], b[N], c[N];
+int la, lb, lc;
+
+bool cmp(int a[], int b[]) {
+    if (la != lb) return la < lb;
+    for (int i = la; i; i--)
+        if (a[i] != b[i]) return a[i] < b[i];
+    return false;  //相等时,避免-0
+}
+
+void sub(int a[], int b[], int c[]) { //a-b=c
+    for (int i = 1; i <= lc; i++) {
+        if (a[i] < b[i]) a[i + 1]--, a[i] += 10;
+        c[i] = a[i] - b[i];
+    }
+    while (c[lc] == 0 && lc > 1) lc--; //去0
+}
+
+int main() {
+    string sa, sb;
+    cin >> sa >> sb;
+    la = sa.size(), lb = sb.size(), lc = max(la, lb);
+    for (int i = 1; i <= la; i++) a[i] = sa[la - i] - '0';
+    for (int i = 1; i <= lb; i++) b[i] = sb[lb - i] - '0';
+    if (cmp(a, b)) swap(a, b), cout << '-';
+    sub(a, b, c);
+    for (int i = lc; i; i--) printf("%d", c[i]);
+    return 0;
+}
+```
+
+### 乘法
+
+[P1303 A*B Problem ](https://www.luogu.com.cn/problem/P1303)
+
+![image-20240829175225024](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829175225024.png)
+
+```cpp
+#include <iostream>
+using namespace std;
+
+const int N=100005;
+int a[N],b[N],c[N];
+int la,lb,lc;
+
+void mul(int a[],int b[],int c[]){ //a*b=c
+  for(int i=0; i<la; i++)
+    for(int j=0; j<lb; j++){
+      c[i+j] += a[i]*b[j];   //存乘积
+      c[i+j+1] += c[i+j]/10; //存进位
+      c[i+j] %= 10;          //存余数
+    }
+  while(lc && c[lc]==0) lc--; //去前导0 
+}
+int main(){
+  string sa,sb;
+  cin>>sa>>sb;
+  la=sa.size(); lb=sb.size(); lc=la+lb;
+  for(int i=la-1; ~i; i--) a[la-1-i]=sa[i]-'0';
+  for(int i=lb-1; ~i; i--) b[lb-1-i]=sb[i]-'0';
+  mul(a,b,c);
+  for(int i=lc; ~i; i--) cout << c[i];
+}
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+typedef vector<int> VI;
+VI A,B;
+
+void mul(VI &A, VI &B, VI &C){
+  for(int i=0; i<A.size(); i++)
+    for(int j=0; j<B.size(); j++){
+      C[i+j] += A[i]*B[j];   //乘积
+      C[i+j+1] += C[i+j]/10; //进位
+      C[i+j] %= 10;          //余数      
+    }
+  while(C.size()>1&&!C.back()) C.pop_back();//前导0 
+}
+int main(){
+  string a, b;
+  cin >> a >> b;
+  for(int i=a.size()-1;~i;i--) A.push_back(a[i]-'0');
+  for(int i=b.size()-1;~i;i--) B.push_back(b[i]-'0');
+  VI C(A.size()+B.size());
+  mul(A, B, C);
+  for(int i=C.size()-1; ~i; i --) cout << C[i];
+  return 0;
+}
+```
+
+
+
+### 减法
+
+![image-20240829175708937](%E8%91%A3%E6%99%93%E7%AE%97%E6%B3%95.assets/image-20240829175708937.png)
+
+```cpp
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+const int N=5005;
+int a[N],b,c[N];
+int len;
+
+void div(int a[],int b,int c[]){ //a/b=c
+  long long t=0;
+  for(int i=len;i>=1;i--){
+    t=t*10+a[i];  //被除数
+    c[i]=t/b;     //存商
+    t%=b;         //余数
+  }
+  while(c[len]==0&&len>1) len--; //去0  
+}
+int main(){        
+  char A[N]; cin>>A>>b; len=strlen(A);
+  for(int i=1;i<=len;i++) a[i]=A[len-i]-'0';
+  div(a,b,c);
+  for(int i=len;i;i--) cout<<c[i];  
+  return 0;
+}
+```
+
+
+
+
+
+
+
+
+
+# 数据结构
+
+## 线段树
+
+### 线段树+懒标记
+
+
+
+![img](https://img2023.cnblogs.com/blog/1973969/202308/1973969-20230801000033462-1856092183.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202308/1973969-20230801000033351-1306409130.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202308/1973969-20230801000033401-26281466.png)
+
+![img](https://img2023.cnblogs.com/blog/1973969/202308/1973969-20230801000033499-1406911072.png)
+
+[P3372 【模板】线段树 1](https://www.luogu.com.cn/problem/P3372)
+
+```cpp
+// 结构体版
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+#define N 100005
+#define LL long long
+#define lc u<<1
+#define rc u<<1|1
+LL w[N];
+struct Tree{ //线段树
+  LL l,r,sum,add;
+}tr[N*4];
+
+void pushup(LL u){ //上传
+  tr[u].sum=tr[lc].sum+tr[rc].sum;
+}
+void pushdown(LL u){ //下传
+  if(tr[u].add){
+    tr[lc].sum+=tr[u].add*(tr[lc].r-tr[lc].l+1),
+    tr[rc].sum+=tr[u].add*(tr[rc].r-tr[rc].l+1),
+    tr[lc].add+=tr[u].add,
+    tr[rc].add+=tr[u].add,
+    tr[u].add=0;      
+  }
+}
+void build(LL u,LL l,LL r){ //建树
+  tr[u]={l,r,w[l],0};
+  if(l==r) return;
+  LL m=l+r>>1;
+  build(lc,l,m);
+  build(rc,m+1,r);
+  pushup(u);
+}
+void change(LL u,LL l,LL r,LL k){ //区修
+  if(l<=tr[u].l&&tr[u].r<=r){
+    tr[u].sum+=(tr[u].r-tr[u].l+1)*k;
+    tr[u].add+=k;
+    return;
+  }
+  LL m=tr[u].l+tr[u].r>>1;
+  pushdown(u);
+  if(l<=m) change(lc,l,r,k);
+  if(r>m) change(rc,l,r,k);
+  pushup(u);
+}
+LL query(LL u,LL l,LL r){ //区查
+  if(l<=tr[u].l && tr[u].r<=r) return tr[u].sum;
+  LL m=tr[u].l+tr[u].r>>1;
+  pushdown(u);
+  LL sum=0;
+  if(l<=m) sum+=query(lc,l,r);
+  if(r>m) sum+=query(rc,l,r);
+  return sum;
+}
+int main(){
+  int n,m,op,x,y,k;  
+  cin>>n>>m;
+  for(int i=1; i<=n; i ++) cin>>w[i];
+  
+  build(1,1,n);
+  while(m--){
+    cin>>op>>x>>y;
+    if(op==2)cout<<query(1,x,y)<<endl;
+    else cin>>k,change(1,x,y,k);
+  }
+  return 0;
+}
+
+
+// 结构体版
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+#define N 100005
+#define LL long long
+#define lc u<<1
+#define rc u<<1|1
+LL w[N];
+struct Tree{ //线段树
+  LL l,r,sum,add;
+}tr[N*4];
+
+void pushup(LL u){ //上传
+  tr[u].sum=tr[lc].sum+tr[rc].sum;
+}
+void pushdown(LL u){ //下传
+  if(tr[u].add){
+    tr[lc].sum+=tr[u].add*(tr[lc].r-tr[lc].l+1),
+    tr[rc].sum+=tr[u].add*(tr[rc].r-tr[rc].l+1),
+    tr[lc].add+=tr[u].add,
+    tr[rc].add+=tr[u].add,
+    tr[u].add=0;      
+  }
+}
+void build(LL u,LL l,LL r){ //建树
+  tr[u]={l,r,w[l],0};
+  if(l==r) return;
+  LL m=l+r>>1;
+  build(lc,l,m);
+  build(rc,m+1,r);
+  pushup(u);
+}
+void change(LL u,LL x,LL y,LL k){ //区修
+  if(x>tr[u].r || y<tr[u].l) return;
+  if(x<=tr[u].l && tr[u].r<=y){
+    tr[u].sum+=(tr[u].r-tr[u].l+1)*k;
+    tr[u].add+=k;
+    return;
+  }
+  pushdown(u);
+  change(lc,x,y,k); 
+  change(rc,x,y,k);
+  pushup(u);
+}
+LL query(LL u,LL x,LL y){ //区查
+  if(x>tr[u].r || y<tr[u].l) return 0;
+  if(x<=tr[u].l && tr[u].r<=y) return tr[u].sum;
+  pushdown(u);
+  return query(lc,x,y)+query(rc,x,y);
+}
+int main(){
+  int n,m,op,x,y,k;  
+  cin>>n>>m;
+  for(int i=1; i<=n; i ++) cin>>w[i];
+  
+  build(1,1,n);
+  while(m--){
+    cin>>op>>x>>y;
+    if(op==2)cout<<query(1,x,y)<<endl;
+    else cin>>k,change(1,x,y,k);
+  }
+  return 0;
+}
+
+
+// 数组版
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+#define N 100005
+#define LL long long
+#define lc u<<1
+#define rc u<<1|1
+LL w[N];
+LL sum[N*4],add[N*4]; //区间和,懒标记
+
+void pushup(LL u){
+  sum[u]=sum[lc]+sum[rc];
+}
+void pushdown(LL u,LL l,LL r,LL mid){
+  if(add[u]){
+    sum[lc]+=add[u]*(mid-l+1);
+    sum[rc]+=add[u]*(r-mid);
+    add[lc]+=add[u];
+    add[rc]+=add[u];
+    add[u]=0;
+  }
+}
+void build(LL u,LL l,LL r){
+  sum[u]=w[l];
+  if(l==r) return;
+  LL mid=l+r>>1;
+  build(lc,l,mid); 
+  build(rc,mid+1,r);
+  pushup(u);
+}
+void change(LL u,LL l,LL r,LL x,LL y,LL k){ //区修
+  if(x>r || y<l) return; //越界
+  if(x<=l && r<=y){      //覆盖
+    sum[u]+=(r-l+1)*k;
+    add[u]+=k;
+    return;
+  }
+  LL mid=l+r>>1;
+  pushdown(u,l,r,mid);    
+  change(lc,l,mid,x,y,k); //裂开
+  change(rc,mid+1,r,x,y,k);
+  pushup(u);
+}
+LL query(LL u,LL l,LL r,LL x,LL y){ //区查
+  if(x>r || y<l) return 0;
+  if(x<=l && r<=y) return sum[u];
+  LL mid=l+r>>1;
+  pushdown(u,l,r,mid);
+  return query(lc,l,mid,x,y)+query(rc,mid+1,r,x,y);
+}
+int main(){
+  int n,m,op,x,y,k;  
+  cin>>n>>m;
+  for(int i=1; i<=n; i ++) cin>>w[i];
+  
+  build(1,1,n);
+  while(m--){
+    cin>>op>>x>>y;
+    if(op==1) cin>>k,change(1,1,n,x,y,k);
+    else cout<<query(1,1,n,x,y)<<endl;
+  }
+  return 0;
+}
+
+```
+
+
+
+[P3374 【模板】树状数组 1](https://www.luogu.com.cn/problem/P3374)
+
+```cpp
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+#define lc u<<1
+#define rc u<<1|1
+#define N 500005
+int w[N];
+struct Tree{
+  int l,r,sum;
+}tr[N*4];
+
+void pushup(int u){ //上传
+  tr[u].sum=tr[lc].sum+tr[rc].sum;
+}
+void build(int u,int l,int r){ 
+  tr[u]={l,r,w[l]};
+  if(l==r) return;
+  int m=l+r>>1;
+  build(lc,l,m);
+  build(rc,m+1,r);
+  pushup(u);
+}
+void change(int u,int x,int k){ //点修
+  if(tr[u].l==x&&tr[u].r==x){
+    tr[u].sum+=k;
+    return;
+  }
+  int m=tr[u].l+tr[u].r>>1;
+  if(x<=m) change(lc,x,k);
+  if(x>m) change(rc,x,k);
+  pushup(u);
+}
+int query(int u,int l,int r){ //区查
+  if(l>tr[u].r || r<tr[u].l) return 0;
+  if(l<=tr[u].l&&tr[u].r<=r) return tr[u].sum;
+  return query(lc,l,r)+query(rc,l,r);
+}
+int main(){
+  ios::sync_with_stdio(0);
+  int n,m,op,x,y;  
+  cin>>n>>m;
+  for(int i=1;i<=n;i++) cin>>w[i];
+  build(1,1,n);
+  while(m--){
+    cin>>op>>x>>y;
+    if(op==1) change(1,x,y);
+    else cout<<query(1,x,y)<<endl;
+  }
+  return 0;
+}
+```

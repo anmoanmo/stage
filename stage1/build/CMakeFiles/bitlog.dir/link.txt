@@ -1,0 +1,2 @@
+/usr/bin/ar qc libbitlog.a CMakeFiles/bitlog.dir/src/bitlog.cpp.o CMakeFiles/bitlog.dir/src/formatter.cpp.o CMakeFiles/bitlog.dir/src/sink.cpp.o CMakeFiles/bitlog.dir/src/logger.cpp.o
+/usr/bin/ranlib libbitlog.a

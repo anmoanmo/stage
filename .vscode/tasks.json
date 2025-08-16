@@ -1,0 +1,38 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "clang-tidy: 当前文件",
+      "type": "shell",
+      "command": "bash",
+      "args": ["-lc", "clang-tidy -p build \"${file}\""],
+      "problemMatcher": "$gcc",
+      "group": "test"
+    },
+    {
+      "label": "clang-tidy: 全工程",
+      "type": "shell",
+      "command": "bash",
+      "args": ["-lc", "run-clang-tidy -p build"],
+      "problemMatcher": "$gcc",
+      "group": "test"
+    },
+    {
+      "label": "显示系统包含路径 (g++)",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "echo | g++ -v -E -x c++ - 2>&1 | sed -n '/search starts here:/,/End of search list./p'"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "clang-format: 当前文件",
+      "type": "shell",
+      "command": "bash",
+      "args": ["-lc", "clang-format -i \"${file}\""],
+      "problemMatcher": []
+    }
+  ]
+}

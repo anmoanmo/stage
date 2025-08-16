@@ -1,0 +1,1 @@
+/usr/bin/c++ -O2 -g -DNDEBUG CMakeFiles/formatter_tests.dir/tests/formatter_tests.cpp.o -o formatter_tests  libbitlog.a -lpthread 

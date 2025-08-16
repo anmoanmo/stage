@@ -1,0 +1,36 @@
+# ===== I/O =====
+PROJECT_NAME           = "bitlog"
+OUTPUT_DIRECTORY       = "/home/anmo/workspace/stage/stage1/docs/doxygen"
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+
+# ===== Sources =====
+INPUT                  = "/home/anmo/workspace/stage/stage1/include" "/home/anmo/workspace/stage/stage1/src"
+FILE_PATTERNS          = *.hpp *.hh *.h *.cpp
+RECURSIVE              = YES
+
+# ===== Extraction =====
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+
+# ===== Parsing =====
+# 若未安装 libclang-dev，则将下行保持为 NO（避免告警）；装了可改成 YES
+CLANG_ASSISTED_PARSING = NO
+CLANG_OPTIONS          = -std=c++17
+
+# ===== Graphviz =====
+HAVE_DOT               = YES
+CLASS_DIAGRAMS         = YES
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES
+DOT_IMAGE_FORMAT       = svg
+INTERACTIVE_SVG        = YES
+DOT_TRANSPARENT        = YES
+DOT_MULTI_TARGETS      = YES
+DOT_GRAPH_MAX_NODES    = 200
+
+# ===== Noise reduction =====
+EXCLUDE_PATTERNS       = */test/* */third_party/* */external/*
+EXCLUDE_SYMBOLS        = detail impl *_impl
