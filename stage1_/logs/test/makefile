@@ -1,7 +1,7 @@
 CXX := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra -O2 -I..   # 按实际位置改 -I
 TARGET := test
-SRC := test_async.cpp
+SRC := test_mylog1.cpp
 DEPS := ../*.hpp
 
 $(TARGET): $(SRC) $(DEPS)

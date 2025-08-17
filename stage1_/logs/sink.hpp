@@ -73,16 +73,16 @@ namespace mylog
         RollBySizeSink(const std::string &basename, size_t max_size) : _basename(basename),
                                                                        _max_size(max_size), _cur_size(0), _seq(0)
         {
-            // 1. 创建日志文件所在的目录
-            std::string pathname = createNewFile();
-            if (!util::File::exists(util::File::path(pathname)))
-            {
-                util::File::createDirectory(util::File::path(pathname));
-            }
-            // 2.创建并打开日志文件
-            _ofs.open(pathname, std::ios::binary | std::ios::app); 
-            assert(_ofs.is_open());
-            _cur_size = static_cast<size_t>(_ofs.tellp());
+            // // 1. 创建日志文件所在的目录
+            // std::string pathname = createNewFile();
+            // if (!util::File::exists(util::File::path(pathname)))
+            // {
+            //     util::File::createDirectory(util::File::path(pathname));
+            // }
+            // // 2.创建并打开日志文件
+            // _ofs.open(pathname, std::ios::binary | std::ios::app);
+            // assert(_ofs.is_open());
+            // _cur_size = static_cast<size_t>(_ofs.tellp());
         }
 
         // 将日志消息进行写入
@@ -91,18 +91,41 @@ namespace mylog
             /*
             在异步场景下，realLog() 一次写进来的 len 可能很大（缓冲里积累了很多条日志）。如果当前 _cur_size 还没到 10 字节（比如 0），就不会 rotate，结果先把一大坨一次性写进去，第一份文件直接超限，后面才可能开始滚动。
             */
-            if (_cur_size + len > _max_size)
-            { // 预判
+            // if (_cur_size + len > _max_size)
+            // { // 预判
+            //     rotate();
+            // }
+            // _ofs.write(data, len);
+            // assert(_ofs.good());
+            // _cur_size += len;
+            if (!_ofs.is_open())
+            {
+                const std::string pathname = createNewFile();
+                if (!util::File::exists(util::File::path(pathname)))
+                    util::File::createDirectory(util::File::path(pathname));
+                _ofs.open(pathname, std::ios::binary | std::ios::app);
+                assert(_ofs.is_open());
+                _cur_size = 0; // 首开一定从 0 开始
+            }
+
+            if (_cur_size + len > _max_size && _cur_size > 0)
+            {
                 rotate();
             }
             _ofs.write(data, len);
-            assert(_ofs.good());
+            if (!_ofs.good())
+                std::cerr << "RollBySizeSink write error\n";
             _cur_size += len;
+            if (_cur_size >= _max_size)
+            {
+                rotate();
+            }
         }
 
     private:
         void rotate()
         {
+            _ofs.flush();
             _ofs.close();
             const std::string pathname = createNewFile();
             if (!util::File::exists(util::File::path(pathname)))

@@ -2,7 +2,6 @@
 #pragma once
 
 #include "buffer.hpp"
-#include "logger.hpp"
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -25,6 +24,12 @@ namespace mylog
         ~AsyncLooper()
         {
             stop();
+        }
+
+        void kick()
+        {
+            std::lock_guard<std::mutex> lk(_mutex);
+            _cond_con.notify_one();
         }
 
         void stop()

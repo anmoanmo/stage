@@ -78,7 +78,9 @@
     "variant": "cpp",
     "fstream": "cpp",
     "strstream": "cpp",
-    "cfenv": "cpp"
+    "cfenv": "cpp",
+    "csignal": "cpp",
+    "any": "cpp"
 },
   
   "editor.tabSize": 4,

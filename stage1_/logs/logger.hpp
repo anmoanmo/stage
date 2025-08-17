@@ -22,6 +22,9 @@
 #include <memory>  // std::shared_ptr（如未包含）
 #include <vector>  // std::vector（如未包含）
 #include <atomic>
+#include <string>
+#include <unordered_map>
+#include <cassert>
 
 namespace mylog
 {
@@ -98,6 +101,8 @@ namespace mylog
             common_level(LogLevel::value::FATAL, file, line, ap, fmt);
             va_end(ap);
         }
+
+        virtual void setMaxBufferSize(size_t max_size) {}
 
     private: //(protected)
         void common_level(const LogLevel::value level,
@@ -177,13 +182,32 @@ namespace mylog
             {
                 return;
             }
-            for (auto &sink : _sinks)
+
+            const char *p = buf.readPtr();
+            const char *end = p + buf.readableSize();
+            const char *line = p;
+
+            while (line < end)
             {
-                sink->log(buf.readPtr(), buf.readableSize());
+                // 找下一条换行（Windows 下行尾是 "\r\n"，找 '\n' 也没问题）
+                const char *nl = static_cast<const char *>(
+                    ::memchr(line, '\n', static_cast<size_t>(end - line)));
+
+                size_t len = nl ? static_cast<size_t>(nl - line + 1)
+                                : static_cast<size_t>(end - line); // 最后一条可能没 '\n'
+
+                for (auto &sink : _sinks)
+                    sink->log(line, len);
+
+                if (!nl)
+                {
+                    break; // 没有更多完整行
+                }
+                line = nl + 1;
             }
         };
 
-        void setMaxBufferSize(size_t max_size)
+        virtual void setMaxBufferSize(size_t max_size) override
         {
             if (_looper)
             {
@@ -312,4 +336,114 @@ namespace mylog
         };
     };
 
+    class LoggerManager
+    {
+    private:
+        std::mutex _mutex;
+        Logger::ptr _root_logger;
+        std::unordered_map<std::string, Logger::ptr> _loggers;
+
+    private:
+        LoggerManager()
+        {
+            // std::unique_ptr<LocalLoggerBuilder> slb(new LocalLoggerBuilder());
+            // slb->buildLoggerName("root");
+            // slb->buildLoggerType(LoggerType::LOGGER_SYNC);
+            // _root_logger = slb->build();
+            // _loggers.insert(std::make_pair("root", _root_logger));
+
+            /*你在 loggerManager() 构造函数里用 LocalLoggerBuilder 造了 root（同步），
+            顺序上没问题（LocalLoggerBuilder 在前）。
+            但这会把 manager 与 builder硬耦合。如果将来你再拆分模块，很容易又回到“声明不可见”的老问题。最小更稳的做法：
+            直接手工构建 root（不通过 builder），语义不变：*/
+            Formatter::ptr fmt = std::make_shared<Formatter>();
+            std::vector<LogSink::ptr> sinks;
+            sinks.push_back(std::make_shared<StdoutSink>());
+            _root_logger = std::make_shared<SyncLogger>("root", LogLevel::value::DEBUG, fmt, sinks);
+            _loggers.emplace("root", _root_logger);
+        }
+        LoggerManager(const LoggerManager &) = delete;
+        LoggerManager &operator=(const LoggerManager &) = delete;
+
+    public:
+        static LoggerManager &getInstance()
+        {
+            static LoggerManager lm;
+            return lm;
+        }
+        bool hasLogger(const std::string &name)
+        {
+            std::unique_lock<std::mutex> lock(_mutex);
+            auto it = _loggers.find(name);
+            if (it == _loggers.end())
+            {
+                return false;
+            }
+            return true;
+        }
+        void addLogger(const std::string &name, const Logger::ptr &logger)
+        {
+            std::unique_lock<std::mutex> lock(_mutex);
+            if (_loggers.find(name) != _loggers.end())
+                return;
+            _loggers.emplace(name, logger);
+        }
+        Logger::ptr getLogger(const std::string &name)
+        {
+            std::unique_lock<std::mutex> lock(_mutex);
+            auto it = _loggers.find(name);
+            if (it == _loggers.end())
+            {
+                return Logger::ptr();
+            }
+            return it->second;
+        }
+        Logger::ptr rootLogger()
+        {
+            std::unique_lock<std::mutex> lock(_mutex);
+            return _root_logger;
+        }
+    };
+
+    class GlobalLoggerBuilder : public LoggerBuilder
+    {
+    public:
+        virtual Logger::ptr build() override
+        {
+            if (_logger_name.empty())
+            {
+                std::cout << "日志器名称不能为空！！";
+                abort();
+            }
+            if (LoggerManager::getInstance().hasLogger(_logger_name))
+            {
+                // 与管理器对齐，避免返回未注册实例
+                return LoggerManager::getInstance().getLogger(_logger_name);
+            }
+            assert(LoggerManager::getInstance().hasLogger(_logger_name) == false);
+            if (_formatter.get() == nullptr)
+            {
+                std::cout << "当前日志器：" << _logger_name << " 未检测到日志格式，默认设置为[ %d{%H:%M:%S}%T%t%T[%p]%T[%c]%T%f:%l%T%m%n ]!\n";
+                _formatter = std::make_shared<Formatter>();
+            }
+            if (_sinks.empty())
+            {
+                std::cout << "当前日志器：" << _logger_name << " 未检测到落地方向，默认设置为标准输出!\n";
+                buildLoggerSink<StdoutSink>();
+            }
+            Logger::ptr lp;
+            if (_logger_type == LoggerType::LOGGER_ASYNC)
+            {
+                lp = std::make_shared<AsyncLogger>(_logger_name, _limit_value, _formatter, _sinks);
+                lp->setMaxBufferSize(_async_max_buf); // ← 补上这一行
+            }
+            else
+            {
+                lp = std::make_shared<SyncLogger>(_logger_name, _limit_value, _formatter, _sinks);
+            }
+
+            LoggerManager::getInstance().addLogger(_logger_name, lp);
+            return lp;
+        }
+    };
 }
