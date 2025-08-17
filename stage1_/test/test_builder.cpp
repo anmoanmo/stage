@@ -1,9 +1,4 @@
-#include "../util.hpp"
-#include "../level.hpp"
-#include "../message.hpp"
-#include "../format.hpp"
-#include "../sink.hpp"
-#include "../logger.hpp"
+#include "logs/logger.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -40,16 +35,24 @@ int main()
     sinks.push_back(SinkFactory<RollBySizeSink>::create("./logfile/test_roll", 1024 * 1024));
     Formatter::ptr fmt(new Formatter());
 
+    std::unique_ptr<LoggerBuilder> builder(new LocalLoggerBuilder());
+    builder->buildLoggerName(logger_name);
+    builder->buildLoggerSink<StdoutSink>();
+    builder->buildLoggerSink<FileSink>("./logfile/test_File.log");
+    builder->buildLoggerSink<RollBySizeSink>("./logfile/test_roll", 1024 * 1024);
+    Logger::ptr logger = builder->build();
+
     // Logger::ptr sync_ptr = std::make_shared<SyncLogger>(logger_name, limit, fmt, sinks);
-    Logger::ptr sync_ptr(new SyncLogger(logger_name, limit, fmt, sinks));
+    // Logger::ptr sync_ptr(new SyncLogger(logger_name, limit, fmt, sinks));
     size_t cursize = 0,
            count = 0;
     std::string msg = readFileToString("./short_text.txt");
     while (cursize < 1024 * 1024 * 10)
     {
         std::string tmp = std::to_string(++count) + msg;
-        sync_ptr->info(__FILE__, __LINE__, "%s", msg.c_str());
-        // 传给 ... 的是 std::string，对应 %s 需要的是 const char*
+        logger->info(__FILE__, __LINE__, "%s", msg.c_str());
+        // sync_ptr->info(__FILE__, __LINE__, "%s", msg.c_str());
+        //  传给 ... 的是 std::string，对应 %s 需要的是 const char*
         cursize += tmp.size();
     }
 }

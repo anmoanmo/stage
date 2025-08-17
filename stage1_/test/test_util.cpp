@@ -1,5 +1,4 @@
-#include "util.hpp"
-#include "level.hpp"
+#include "logs/logger.hpp"
 int main()
 {
     std::cout << mylog::LogLevel::toString(mylog::LogLevel::value::DEBUG) << std::endl;

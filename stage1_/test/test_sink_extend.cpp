@@ -1,8 +1,4 @@
-#include "../util.hpp"
-#include "../level.hpp"
-#include "../message.hpp"
-#include "../format.hpp"
-#include "../sink.hpp"
+#include "logs/logger.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -34,21 +30,20 @@ int main()
 
     std::string file = "test_sink.cpp";
     LogMsg msg1;
-    ;
+    Formatter fmt;
     msg1.setPayload(readFileToString("./文本.txt"));
 
-    LogMsg msg(logger, file, 123, std::string("测试sink功能"), LogLevel::value::INFO);
-    Formatter fmt;
-    LogSink::ptr stdout_lsp = SinkFactory<StdoutSink>::create();
+    // LogMsg msg(logger, file, 123, std::string("测试sink功能"), LogLevel::value::INFO);
+    // LogSink::ptr stdout_lsp = SinkFactory<StdoutSink>::create();
     std::string basename = "./logfile";
-    LogSink::ptr file_lsp = SinkFactory<FileSink>::create(basename + "/file/test.log");
+    // LogSink::ptr file_lsp = SinkFactory<FileSink>::create(basename + "/file/test.log");
     LogSink::ptr roll_lsp = SinkFactory<RollBySizeSink>::create(basename + "/roll", 1024 * 1024);
 
-    std::string str = fmt.format(msg);
-    stdout_lsp->log(str.c_str(), str.size());
-    file_lsp->log(str.c_str(), str.size());
-    size_t cursize = 0;
-    size_t count = 0;
+    // std::string str = fmt.format(msg);
+    // stdout_lsp->log(str.c_str(), str.size());
+    // file_lsp->log(str.c_str(), str.size());
+    // size_t cursize = 0;
+    // size_t count = 0;
     // while (cursize < 1024)
     // {
     //     std::string tmp = std::to_string(++count) + str;
@@ -57,4 +52,15 @@ int main()
     // }
     std::string str1 = fmt.format(msg1);
     roll_lsp->log(str1.c_str(), str1.size());
+
+    // extend
+    LogSink::ptr time_lsp = SinkFactory<RollByTimeSink>::create(basename + "/time", TimeUnit::Secondly);
+    int sec = 0;
+    while (sec < 180)
+    {
+        time_lsp->log(str1.c_str(), str1.size());
+        using namespace std::chrono_literals;
+        std::this_thread::sleep_for(1s);
+        sec++;
+    }
 }

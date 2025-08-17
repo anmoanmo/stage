@@ -1,5 +1,4 @@
-#include "../mylog.h"
-
+#include "logs/logger.hpp"
 #include <algorithm>
 #include <iostream>
 #include <fstream>

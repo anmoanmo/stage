@@ -242,6 +242,7 @@ namespace mylog
     class LoggerBuilder
     {
     public:
+        using ptr = std::shared_ptr<LoggerBuilder>;
         LoggerBuilder() : _logger_type(LoggerType::LOGGER_SYNC),
                           _limit_value(LogLevel::value::DEBUG) {}
 

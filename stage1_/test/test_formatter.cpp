@@ -1,8 +1,5 @@
 // test_min_ok.cpp
-#include "../format.hpp"
-#include "../message.hpp"
-#include "../level.hpp"
-#include "../util.hpp"
+#include "logs/logger.hpp"
 
 #include <iostream>
 #include <sstream>

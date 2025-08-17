@@ -1,4 +1,4 @@
-#include "../buffer.hpp"
+#include "logs/buffer.hpp"
 
 #include <algorithm>
 #include <iostream>
